@@ -1,0 +1,681 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: 小昭昭
+ * Date: 2018/4/24
+ * Time: 9:38
+ */
+require __DIR__ . '/ErrorCode.php';
+require __DIR__ . '/CommentParser.php';
+require __DIR__ . '/ApiDocumentException.php';
+
+class ApiDocument
+{
+    private $secret = "+++++****++++";
+    /**
+     * 解析注释对象
+     * @var CommentParser
+     */
+    private $doc_parser;
+    /**
+     *  一个方法多种请求的分隔符
+     * @var string
+     */
+    private $explode_str = '@------------';
+    /**
+     * 定界标识
+     * @var string
+     */
+    private $delimiter = "SUNLANDS";
+    /**
+     * 版本
+     * @var string
+     */
+    private $version = "apidoc-sunlands 3.0";
+    /**
+     * 公共配置
+     * @var array
+     */
+    private $config = array(
+        #公共参数--所有接口
+        "public_params" => array(),
+        #公共提示消息--当showMessage时显示的消息
+        "public_message" => array(),
+        # 文档模块化[title:文档标题,"path"=>"需要生成文档的注释文件所在目录"]
+        "module" => array(// ["title" => '分校小程序', "path" => "D:\www\shangdejigou\wifi\cronus"]
+        ),
+    );
+    /** 模块生成后状态消息队列
+     * @var array
+     */
+    public $moduleMessage = [];
+
+    /**
+     * swagger.json 储存对象
+     * @var array
+     */
+    private $json = array(
+        'swagger' => '2.0',
+        //文档的一些信息
+        'info' => array(
+            'version' => "1.0.0",
+            'title' => 'cronus系统接口文档',
+            'description' => '文档描述',
+            'contact' => array('name' => '张鹏娣'),
+            'license' => array('name' => 'MIT'),
+        ),
+        //主机地址
+        'host' => 'http://localhost',
+        //父地址，可以是模块名 : /api
+        'basePath' => '',
+        //API的传输协议。值必须来自列表：“HTTP”、“HTTPS”、“WS”、“WSS”。如果不包括方案，则要使用的默认方案是用于访问规范的方案。
+        'schemes' => array(
+            'http',
+        ),
+        //API可以使用的MIME类型列表。这对所有API都是全局的，但可以在特定API调用上重写。值必须按照Mime Types的描述。
+        'consumes' => array(
+            'application/json',
+        ),
+        //API可以产生的MIME类型列表。这对所有API都是全局的，但可以在特定API调用上重写。值必须按照Mime Types的描述。
+        'produces' => array(
+            'application/json',
+        ),
+        'tags' => array(),
+        //API的可用路径和操作,接口注释生成都在此处。[核心]
+        'paths' => array(),
+        'definitions' => array()
+    );
+    private static $obj = null;
+
+    #################### 初始化操作 ##########################
+    /**
+     * 初始化数据 (常量)
+     */
+    private function init()
+    {
+        ### 定义常量 ### (根据实际情况使用该常量)
+        $dirs = explode(DIRECTORY_SEPARATOR, dirname(__DIR__));
+        define('WEB_ROOT', dirname(dirname(dirname(__DIR__))));//部署项目的根目录
+        define("API_ROOT_NAME", $dirs[count($dirs) - 2]);//顶级目录名称
+        define("API_COVERT", implode("/", array("/" . API_ROOT_NAME, "covert")));//生成文档路径
+        define("API_DIST", implode("/", array("/" . API_ROOT_NAME, "dist")));//展示文档路径
+
+        define("API_COVERT_IMG", implode("/", array(API_COVERT, "img")));//img目录地址
+        define("API_COVERT_JS", implode("/", array(API_COVERT, "js")));//js目录地址
+        define("API_COVERT_CSS", implode("/", array(API_COVERT, "css")));//css目录地址
+        ### 默认设置 ###
+        ini_set('max_execution_time', '0');//不限制页面执行时间
+        date_default_timezone_set("Asia/Shanghai");//设置时区
+
+        ### 加载config.php 并配置初始化json,config ###
+        # 加载配置文件
+        $params = require(__DIR__ . '/../config/Config.php');
+
+        $this->json = array_merge($this->json, $params['server_info']);//合并json配置
+        $this->config = array_merge($this->config, $params['config']);//合并公共配置
+        ### 添加公共提示信息 ###
+
+        $this->addPublicMessage("注释中请定义指定定界符:" . $this->delimiter . ',否则将不会被解析');
+        ### 创建初始化需要的目录###
+        $dir = $this->mk_json_dir();//创建json根目录
+
+        ### 开启session ###
+        session_start();
+    }
+
+    private function __construct($config = array())
+    {
+        ### 初始化###
+        $this->init();
+    }
+
+    /**
+     * 获取注释解析对象(行解析 ,块解析 )
+     * @return CommentParser
+     */
+    private function getDocParserObj()
+    {
+        $deparser = new CommentParser();
+        $deparser->params_parse_block = array_merge($deparser->params_parse_block, array('examples'));
+        $deparser->params_array_keys = array_merge($deparser->params_array_keys, array('param'));
+        return $deparser;
+    }
+
+    /**
+     * 获取当前Swagger_Helper实例对象
+     * @return null|ApiDocument
+     */
+    public static function getObj($config = array())
+    {
+
+        if (!self::$obj instanceof self) {
+            self::$obj = new self();
+        }
+        self::$obj->doc_parser = new CommentParser();
+        return self::$obj;
+    }
+
+    ###################  配置操作  #####################
+    /**
+     * 添加公共参数
+     * @param array $param ['name'=>'参数名','in'=>'参数位置','default'=>"默认值","description"=>"描述","required"=> 是否必传（true/false）,"not_add_url=>array('不需要该参数的url')"]
+     * @return $this
+     */
+    public function addPublicParams($params)
+    {
+        if (!is_array($params)) {
+            return $this;
+        }
+        foreach ($params as $param) {
+            $p["name"] = array_key_exists('name', $param) ? $param["name"] : "";//参数名字
+            $p["in"] = array_key_exists('in', $param) ? $param["in"] : "formData";//位置
+            $p["default"] = array_key_exists('default', $param) ? $param["default"] : "";//默认值
+            $p["description"] = array_key_exists('description', $param) ? $param["description"] : "";//描述
+            $p["required"] = array_key_exists('required', $param) ? $param["required"] : false;//是否必填
+            $p["not_add_url"] = array_key_exists('not_add_url', $param) && is_array($param['not_add_url']) ? $param['not_add_url'] : array();//不添加该参数的url集合
+            $this->config['public_params'][] = $p;
+        }
+        return $this;
+    }
+
+    /**
+     * 添加公共消息
+     */
+    public function addPublicMessage($message)
+    {
+        $this->config['public_message'][] = $message;
+        return $this;
+    }
+
+    /**
+     * 将注释分割符分割后在拼成完整的注释
+     * @param $com
+     * @return array
+     */
+    private function parse_method($com)
+    {
+        $coms = explode($this->explode_str, $com);
+        if (count($coms) > 1) {
+            foreach ($coms as $k => &$v) {
+                if ($k == 0) {
+                    $coms[$k] = $v . '*/';
+                } else {
+                    $coms[$k] = '/**' . $v;
+                }
+            }
+        }
+        return $coms;
+    }
+
+#####################  注释格式化操作 #####################################
+    #json数据缓冲区
+    private $json_cache = [];
+
+    /**
+     * 初始化缓冲区
+     * @param null $module 模块信息
+     */
+    private function json_cache_init($module = null)
+    {
+
+        # 初始化配置
+        $this->json_cache = $this->json;
+        # 设置模块标题
+        $this->json_cache['info']['title'] = $module && array_key_exists('title', $module) ? $module['title'] : '';
+        # 设置版本信息
+        $this->json_cache['info']['version'] = $module && array_key_exists('version', $module) ? $module['version'] : '1.0.0';
+        # 设置此模块的描述
+        $this->json_cache['info']['description'] = $module && array_key_exists('description', $module) ? $module['description'] : '';
+
+        # 设置模块host
+        if (array_key_exists('host', $module) && $module['host']) {
+            $this->json_cache['host'] = $module['host'];
+        }
+        # 设置模块标签
+        if (array_key_exists('tags', $module) && $module['tags'] && is_array($module['tags'])) {
+            $this->json_cache['tags'] = array_merge($this->json_cache['tags'], $module['tags']);
+        }
+    }
+
+    /**
+     * 目录文件注释格式化
+     * @param  $from_dir 要获取注释的类文件目录
+     * @param  $to_dir   生成json文件存放目录（false 则不保存到文件中）
+     * @param  $is_depath 递归层级  (0 不递归 ,<0 无限制递归  >0 递归层级 )
+     */
+    private function dir_format_json($from_dir, $is_depath = -1, $module = null)
+    {
+        try {
+            if (!is_dir($from_dir)) {
+                throw new \ApiDocumentException("({$from_dir})不是正确目录路径");
+            }
+            #读取目录获取文件
+            $hande = opendir($from_dir);
+            while ($file = readdir($hande)) {
+                if (in_array($file, ['.', '..'])) {
+                    continue;
+                }
+                #如果是目录 递归获取文件
+                $fullpath = $from_dir . '/' . $file;
+                if (is_dir($fullpath) && $is_depath != 0) {
+                    $result = $this->dir_format_json($fullpath, $is_depath--, $module);
+                    if (!$result) {
+                        return false;
+                    }
+                }
+                #如果是文件
+                if (is_file($fullpath)) {
+                    $result = $this->file_format_json($fullpath, $com);
+                    if (!$result) {
+                        return false;
+                    }
+                }
+            }
+        } catch (ApiDocumentException $se) {
+            $this->moduleMessage[$module['title']]['status'] = 1001;
+            $this->moduleMessage[$module['title']]['file_name'] = $fullpath;
+            $this->moduleMessage[$module['title']]['com'] = $com;
+            $this->moduleMessage[$module['title']]['status_message'] = $se->getMessage();
+
+            return false;
+
+        } catch (\Exception $e) {
+            $this->moduleMessage[$module['title']]['status'] = 500;
+            $this->moduleMessage[$module['title']]['file_name'] = $fullpath;
+            $this->moduleMessage[$module['title']]['com'] = $com;
+            $this->moduleMessage[$module['title']]['status_message'] = $e->getMessage();
+            return false;
+
+        }
+        return true;
+    }
+
+    /**
+     * 单文件注释格式化
+     * @param $path 具体文件地址
+     * @param &$comment 当前注释
+     * @param string $ext_filter 过滤指定文件
+     * @return array
+     */
+    private function file_format_json($path, &$comment = null, $ext_filter = "*")
+    {
+
+        if (!file_exists($path)) {
+            throw new ApiDocumentException("{$path}文件不存在");
+        }
+        $info = pathinfo($path);
+        #针对于PHP文件 正则获取注释
+        if (is_array($info) && array_key_exists('extension', $info) && $info['extension'] == 'php') {
+            $contents = file_get_contents($path);
+            $matchs = [];
+            preg_match_all('@/\*\*' . $this->delimiter . '.*?\*/@s', $contents, $matchs);
+            foreach ($matchs[0] as $com) {
+                $comment = $com;
+                #格式化注释 到json数组中
+                $result = $this->comment_format($com, $path);
+                if ($result !== true) {
+                    return $result;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     *  将数据转未json写入到指定文件中
+     */
+    private function putFile($file_name, $data)
+    {
+        try {
+            file_put_contents($file_name, json_encode($data, 2));
+        } catch (\Exception $e) {
+            throw new ApiDocumentException('写入json文件失败:' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 格式化注释到json中
+     * @param $com 完整注释
+     * @param $filename 注释所在文件
+     * @return bool
+     * @throws ApiDocumentException
+     */
+    private function comment_format($com, $filename = '')
+    {
+
+        //  echo $filename;echo "<br>";
+        $docs = $this->parse_method($com);
+        foreach ($docs as $doc) {
+
+            #解析注释
+            $d = $this->getDocParserObj();
+            $info = $d->parse($doc);
+            if (!$info) {
+                continue;
+            }
+            $data = array();
+
+            if (!array_key_exists('url', $info)) {
+                throw new \ApiDocumentException('注释中未发现必填项:url');
+            }
+            if (!array_key_exists('method', $info)) {
+                throw new \ApiDocumentException('注释中未发现必填项:method');
+            }
+            # 添加公共参数
+            $public_params = $this->config['public_params'];
+            if ($public_params) {
+                foreach ($public_params as $pp) {
+                    $not_add_url = $pp['not_add_url'];
+                    unset($pp['not_add_url']);
+                    # 如果不在不添加的地址集合中 ,和通配符地址  中 则添加参数
+                    $b = true;
+                    foreach ($not_add_url as $url) {
+                        # 地址等同 或者 匹配通配等同
+                        $index = strrpos($url, '/*');
+                        if ($info['url'] == $url || ($index && substr($url, 0, $index) == substr($info['url'], 0, $index))) {
+                            $b = false;
+                            break;
+                        }
+                    }
+                    if ($b) {
+                        $data['parameters'][] = $pp;
+                    }
+                }
+            }
+            #解析参数
+            if (array_key_exists('param', $info)) {
+                foreach ($info['param'] as &$param) {
+
+                    if ($parameters = json_decode($param, true)) {
+                        $data['parameters'][] = $parameters;
+                    } else {
+                        $arr = array();
+                        #去除空项
+                        $p = array_filter(explode(' ', $param), function ($v) {
+                            return !(trim($v) === "");
+                        });
+                        $p = array_splice($p, 0, count($p));
+                        $arr['type'] = $p[0];//类型
+                        $arr['name'] = $p[1];//名字
+                        $arr['default'] = $p[2] == '/' ? '' : $p[2];//默认值
+                        $arr['in'] = $p[3];//位置
+                        $arr['description'] = isset($p[4]) ? $p[4] : '';//描述*/
+                        $arr['required'] = (isset($p[5]) && $p[5] == 'true');//是否必填
+                        $arra['allowEmptyValue'] = (isset($p[6]) && $p[6] == 'true');//是否允许为空(空值则也会发送)
+                        $data['parameters'][] = $arr;
+                    }
+                }
+            }
+
+            #解析描述信息
+            if (array_key_exists('description', $info)) {
+                $data['description'] = $info['description'];
+            }
+            #解析标签
+            if (array_key_exists('tags', $info)) {
+                $data['tags'] = explode(' ', $info['tags']);
+            }
+            #解析标识 operationId
+            if (array_key_exists('operationId', $info)) {
+                $data['operationId'] = $info['operationId'];
+            }
+            #解析方法总结
+            if (array_key_exists('summary', $info)) {
+                $data['summary'] = $info['summary'];
+            }
+            #解析请求数据类型(重写)
+            if (strtolower($info['method']) == 'post') {
+                $data['consumes'] = ['application/x-www-form-urlencoded'];
+            }
+            if (array_key_exists('consumes', $info)) {
+                $data['consumes'] = [$info['consumes']];
+            }
+            #解析响应数据
+            if (array_key_exists('return', $info)) {
+                $arr = [];
+                $return = explode(' ', $info['return']);
+                $arr["200"]['description'] = isset($return[1]) ? $return[1] : '';//名字
+                //  $arr["200"]['schema']['type']='array';
+                $data['responses'] = $arr;
+            }
+            # 解析案例 说明
+            if (array_key_exists('examples', $info)) {
+                $v = json_decode($info['examples'], 1);
+                if (!$v) {
+                    throw new \ApiDocumentException('examples 的数据无法解析,格式可能不正确');
+                }
+                $data['responses']['200']['examples'] = $v;
+            }
+            $this->json_cache['paths'][$info['url']][strtolower($info['method'])] = $data;
+
+        }
+        return true;
+    }
+
+################### 模块操作 ########################
+    #创建/dist/json/module 目录
+    private function mk_json_dir()
+    {
+        # 创建json目录
+        $json_module = WEB_ROOT . DIRECTORY_SEPARATOR . API_DIST . "/json/module";
+        if (!file_exists($json_module)) {
+            mkdir($json_module, 0775, true);
+        }
+        return $json_module;
+    }
+
+    # 格式化模块数据(生成json文件)
+    private function module_format($modules, $json_name)
+    {
+        # 创建json根目录
+        $dir = $this->mk_json_dir();
+        # 删除原有json
+        $module_path = $dir . '/' . $json_name . '.json';
+        if (is_file($module_path)) {
+            unlink($module_path);
+        }
+        # 过滤
+        $modules_new = [];
+        foreach ($modules as $m) {
+            $titles = array_column($this->config['module'], 'title');
+            $key = array_search($m['title'], $titles);
+            if (is_int($key)) {
+                $m1['title'] = $this->config['module'][$key]['title'];
+                $modules_new[] = $m1;
+            }
+        }
+        # 写入json
+        $this->putFile($module_path, $modules_new);
+    }
+
+    # 模块化生成文档
+    public function module_fromat_json()
+    {
+        $data = $this->returnSuccess();
+        try {
+            # 获取模块列表
+            $module = $this->config['module'];
+
+            if (!$module) {
+                throw new \ApiDocumentException('Config.php配置文件中未发现module项');
+            }
+
+            # 根据模块生成对应的json文件
+            foreach ($module as $m) {
+                $this->moduleMessage[$m['title']] = array(
+                    'status' => 0,//状态
+                    'status_message' => '',
+                    'message' => [],//消息列表
+                    'file_name' => '',//文件地址
+                    'com' => '',//注释
+                );
+                # 1.初始化json_cache(模块title\host\tags)
+                $this->json_cache_init($m);
+                # 2.判断是否是数组 字符串(文件,目录)
+                if (is_array($m['path'])) {
+                    $path = $m['path'];
+                } else {
+                    $path=array();
+                    $path[] = $m['path'];
+                }
+                foreach ($path as $p) {
+
+                    # 判断路径是否存在
+                    if (!file_exists($p)) {
+                        throw new ApiDocumentException("config.php > modules > path( {$p} )路径不存在");
+                    }
+                    # 如果是目录
+                    if (is_dir($p)) {
+                        $this->dir_format_json($p,-1, $m);
+                    # 如果是文件
+                    } else {
+                        $this->file_format_json($p);
+                    }
+
+                }
+                # 3.将json_cache 写入文件 (如果无错)
+                $to_dir="../dist/json/".md5($m['title']).'.json';
+                if ($to_dir && $this->moduleMessage[$m['title']]['status'] == 0) {
+                    $this->putFile($to_dir, $this->json_cache);
+                }
+            }
+        } catch (\Exception $e) {
+            $data['status'] = ErrorCode::MODULE_ERROR;
+            $data['message'] = $e->getMessage();
+            $this->moduleMessage = [];
+        }
+        # 生成module.json文件 并返回链接
+        if ($this->moduleMessage) {
+            $build_module = [];
+            foreach ($this->moduleMessage as $k => $m) {
+                if ($m['status'] == 0) {
+                    $build_module[] = array('title' => $k);
+                }
+            }
+            $url = $this->bulid_module_url($build_module, true);
+        }
+        $data['data']['modules'] = $this->moduleMessage;
+        $data['data']['url'] = isset($url) ? $url : '';
+        return $data;
+    }
+
+    /**
+     * 生成模块json文件 并返回dist地址
+     * @param $modules 模块列表([[title=>'模块1'],['title'=>'模块2']])
+     * @param bool $is_all 是否是所有模块(为后期确保展示比较)
+     * @return string 地址链接(/apidoc/dist?num={json_name})
+     */
+    public function bulid_module_url($modules, $is_all = false)
+    {
+        if (!$modules) {
+            return "";
+        }
+        # 生成一个主模块文件
+        if ($is_all) {
+            $json_name = "module_all";
+            $this->module_format($modules, $json_name);
+        }
+
+        # 生成dist展示模块
+        $json_name = "module_" . md5(json_encode($modules, 2));
+
+        # 写入json 文件
+        $this->module_format($modules, $json_name);
+
+        # 返回链接
+        return API_DIST . '?num=' . $json_name;
+    }
+
+ ################### 工具信息操作  ########################
+    /**
+     * 获取工具信息(版本..)
+     * @return array
+     */
+    public function getApiDocmentInfo()
+    {
+
+        return array(
+            'version' => $this->version,
+            'date' => date('Y-m-d H:i:s', time()),
+        );
+    }
+
+    /**
+     * 转jsons数据并输出
+     * @param $data
+     */
+    public function asJson($data)
+    {
+        echo json_encode($data, true);
+    }
+#################### 页面操作 ####################################
+
+    public function showCovertPage(){
+        $this->showPage("covert");
+    }
+    public function showAuthPage(){
+        $this->showPage('auth');
+    }
+    /**
+     * 显示指定页面
+     * @param string $name 模板名
+     */
+    public function showPage($name = "covert", $ext = "php")
+    {
+        header('Content_Type:text/html;charset=utf8');
+        include("./template/" . $name . "." . $ext);
+    }
+################  权限操作 #####################
+
+    /**
+     * 验证权限
+     * @return bool
+     */
+    public function checkAuth()
+    {
+        # 未设置密码 直接通过
+       if(!array_key_exists('covert_password',$this->config)||!$this->config['covert_password']){
+           return true;
+       }
+
+       # 设置密码了--不存在$_SESSION['apidoc_auth']
+       if(!array_key_exists('apidoc_auth',$_SESSION)){
+           return false;
+       }
+       # 设置密码了---验证密码
+       if(md5($this->config['covert_password'])==$_SESSION['apidoc_auth']){
+           return true;
+       }
+       unset($_SESSION['apidoc_auth']);
+       return false;
+    }
+
+    /**
+     * 验证密码
+     * @param $pwd
+     */
+    public function checkPwd($pwd)
+    {
+        $pwd=md5($pwd);
+        # 未设置密码 直接通过
+        if(!array_key_exists('covert_password',$this->config)||!$this->config['covert_password']){
+            return true;
+        }
+        # 配置中存在密码
+        if(md5($this->config['covert_password'])==$pwd){
+            # 添加session
+            $_SESSION['apidoc_auth']=$pwd;
+            return true;
+        }
+        return false;
+    }
+ ##################### 返回信息(格式) #######################
+    public function returnError($message='',$code=500,$data=array()){
+        $data=array('status'=>$code,'message'=>$message,'data'=>$data);
+        return $data;
+    }
+    public function returnSuccess($data=array(),$message=''){
+        $data=array('status'=>0,'message'=>$message,'data'=>$data);
+        return $data;
+    }
+}

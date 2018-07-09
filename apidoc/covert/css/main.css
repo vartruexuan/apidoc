@@ -1,0 +1,111 @@
+/*
+    message.html 主样式
+*/
+body{
+    background: #2aabd2;
+}
+.header{
+    width: 1000px;
+    font: 14px/21px "Open Sans", Arial, sans-serif;
+    color: #666;
+    background-color: ghostwhite;
+    padding:10px 20px 30px 20px;
+    margin: 20px auto;
+    border-radius: 5px;
+}
+.left{
+    width: 140px;
+    height: 400px;
+    font: 14px/21px "Open Sans", Arial, sans-serif;
+    color: #666;
+    background-color: ghostwhite;
+    padding: 10px;
+    margin: 40px 0px;
+    border-radius: 5px;
+    float: left;
+}
+.div-box{
+    margin: 40px auto;
+    width: 1000px;
+    overflow-y: -webkit-paged-y;
+
+}
+.clear_float{
+    clear: both;
+}
+.footer{
+    width: 1000px;
+    font: 14px/21px "Open Sans", Arial, sans-serif;
+    color: #666;
+    background-color: ghostwhite;
+    padding: 20px;
+    margin: 10px auto;
+    border-radius: 5px;
+}
+.footer a{
+    margin-right: 20px;
+    color: #00AA88;
+    text-decoration: underline;
+}
+.container {
+    width: 1000px;
+    font: 14px/21px "Open Sans", Arial, sans-serif;
+    color: #666;
+    background-color: ghostwhite;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 5px;
+    overflow-y: -webkit-paged-y;
+    min-height: 600px;
+}
+.container>.tab-container{
+    min-height: 360px;
+}
+p {
+    padding: 2px;
+    /*            margin-bottom: 2px;*/
+//   border:2px solid gray;
+}
+
+
+.hide {
+    display: none;
+}
+.comment{
+    color:green;
+}
+.title_ok{
+
+    color:green;
+    font-size: 18px;
+}
+.title_error{
+    color:red;
+    font-size: 18px;
+}
+
+.covert-status{
+
+
+}
+.module{
+    min-height: 140px;
+}
+h4{
+    margin-bottom: 0px;
+}
+.title{
+
+    font-size: 18px;
+    font-weight: bold;
+}
+hr{
+    border:0.5px solid black;
+    height: 0px;
+    padding: 0px;
+    margin: 10px;
+}
+.module-select{
+    background-color: skyblue;
+}
+
