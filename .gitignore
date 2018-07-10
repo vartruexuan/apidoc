@@ -3,5 +3,5 @@ index.php
 assets
 uploads
 .DS_Store
-apidoc/json
+apidoc/dist/json
 !.gitignore
