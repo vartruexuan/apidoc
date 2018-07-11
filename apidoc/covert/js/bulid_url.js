@@ -77,14 +77,17 @@ $(function () {
  * @param num 链接名
  */
 function del_url(num) {
+
     parent.ApiHelper.ajax({
-        url: parent.page_covert+'type=4',
+        url:"" ,
         type: "post",
         dataType: "json",
         data: {
+            type:3,
             num: num
         },
         success: function (jsonData) {
+
             if(jsonData.status==0){
                 //成功移除对应的链接
                 $('.urls-list a[data-url='+num+']').remove();

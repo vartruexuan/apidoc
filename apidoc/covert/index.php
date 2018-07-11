@@ -34,8 +34,9 @@ if ( $method== 'get') {
      *              0.生成文档
      *              1.生成模块链接
      *              2.验证权限
+     *              3.删除指定模块链接
      */
-    $auth_types = [0, 1];
+    $auth_types = [0, 1,3];
     $type = isset($_POST['type']) ? $_POST['type'] : 0;
     # 验证权限
     if (in_array($type, $auth_types)) {
@@ -69,6 +70,11 @@ if ( $method== 'get') {
             $return_data['status'] = ErrorCode::AUTH_ERROR;
             $return_data['message'] = "密码验证失败";
         }
+    # 删除链接
+    }else if($type == 3){
+
+        $num=isset($_POST['num'])?$_POST['num']:'';
+        $return_data=  $apiobj->del_module_url($num);
     } else {
         # 生成文档
         $return_data = $apiobj->module_fromat_json();

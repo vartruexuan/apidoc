@@ -657,6 +657,22 @@ class ApiDocument
         }
         return $urls?$urls:[];
     }
+
+    /**
+     * 删除指定链接
+     * @param $num 链接文件名 /dist/json/module/xxxx.json
+     */
+    public  function del_module_url($num)
+    {
+        $path=WEB_ROOT.API_DIST.'/json/module/'.$num.'.json';
+        if($num==$this->module_all_name||!file_exists($path)){
+            return $this->returnError('文件不存在');
+        }
+       if( !@unlink($path)){
+            return $this->returnError('删除文件失败');
+       }
+       return $this->returnSuccess();
+    }
 #################### 页面操作 ####################################
 
     # 显示生成页面

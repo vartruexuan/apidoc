@@ -44,7 +44,7 @@ return [
     #apidoc 公共配置
     'config' => [
         # 进入生成文档页面进行权限验证(不加验证留空即可)
-        "covert_password" => "12345678",
+        "covert_password" => "123456789",
         # 文档模块化
         "module" => array(
             [
