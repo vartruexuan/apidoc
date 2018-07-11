@@ -1,5 +1,7 @@
 //*********ApiHelper.js 核心操作对象************
 var ApiHelper = {
+    module_name:"",
+    module_url:"",
     //初始化
     init: function () {
         self = this;
@@ -15,7 +17,7 @@ var ApiHelper = {
             self.covert();
         });
         //绑定生成指定模块
-        this.bind_build__url();
+        this.bind_build_url();
         return this;
     },
     //设置生成文档状态
@@ -53,7 +55,7 @@ var ApiHelper = {
         html += "<span>失败: <span class='module_error badge'   style='background-color:wheat;color: red;font-size: 18px;'>" + error_count + "</span></span> ";
         $('.covert-status').html(html);
         //错误数量大于0 闪烁提醒
-        if(error_count>0){
+        if (error_count > 0) {
             this.blink('.module_error');
 
         }
@@ -67,9 +69,8 @@ var ApiHelper = {
             id_index += 1
             var id = "c" + id_index;
 
-
             //添加返回信息
-            var dd_con = "<div style='padding:10px;'>";
+            var dd_con = '<div style="padding:10px;">';
             if (modules[i]['status'] == 0) {
                 dd_con += "<pre><p class='title_ok'>(" + i + ")生成成功" + "</p></pre>"
                 //模块生成失败
@@ -109,10 +110,11 @@ var ApiHelper = {
             beforeSend: function () {
                 $('.tab-container .nav-tabs').html('');
                 $('.tab-container .tab-content').html('');
-                $('.modules_status').html('<a><img src="' + api_covert_img + '/load.gif"/> 正在加载中...</a>');
+                $('.modules_status').html('<a style="font-size: 20px;"><img mou height="200px" src="' + page_covert_img + '/load.gif"/> 正在生成文档中.....</a>');
             },
             success: function (jsonData) {
                 self.module_url = jsonData.data.url;
+                self.module_name= (self.module_url.split('num='))[1];
                 //展示生成文档状态
                 self.set_covert_status(jsonData);
                 //将数据嵌入到页面中
@@ -128,126 +130,37 @@ var ApiHelper = {
         return this;
     },
     //绑定生成链接事件
-    bind_build__url: function () {
-
-        var self = this;
-        //绑定选中事件
-        $('body').delegate('.modules-div button', 'click', function () {
-            $(this).toggleClass('active');
-        });
-        //绑定跳转事件
-        $('body').delegate('.module .go_url', 'click', function () {
-
-            var url = $('input[name=modules_url]').val();
-            if (url) {
-                window.open(url);
-            }
-        })
-
-        // 绑定事件
+    bind_build_url: function () {
         $('#modules_url').on('click', function () {
-            //获取模块名称
-            if (!self.module_url) {
-                layer.msg('未发现对应的模块,可能是文档并未生成成功', {icon: 2, time: 3000});
-                return;
-            }
-            $ms = self.module_url.split('num=');
-            //获取接口模块json 并解析
-            self.ajax({
-                url: api_dist + '/json/module/' + $ms[1] + '.json',
-                type: 'get',
-                dataType: "json",
-                success: function (jsonData) {
-                    if (!jsonData) {
-                        layer.msg('未发现对应的模块...', {icon: 2})
+            layer.open({
+                type: 2,
+                title: '指定模块生成链接',
+                shadeClose: true,
+                shade: [0.5],
+                offset:'ct',
+               // maxmin: true, //开启最大化最小化按钮
+                area: ['900px', '400px'],
+                content: page_bulid_url,
+                //btn: ['生成'],
+                btn1: function (index, layero) {
+
+                    // 获取选中的模块
+                    var div_m = $('.module-list a.active');
+                    if (div_m.length < 1) {
+                        layer.msg('请选择要生成链接的模块');
+                        return;
                     }
-                    //拼接模板 并展示
-                    var html = "<div style='padding:10px;' class='module'>";
-                    //url框
-                    html += '<div class="input-group ">\n' +
-                        '          <span class="input-group-addon" id="sizing-addon1">url:</span>' +
-                        '          <input type="text" class="form-control" name="modules_url" aria-label="Text input with multiple buttons" readonly>\n' +
-                        '          <div class="input-group-btn">\n' +
-                        '            <button type="button" class="btn btn-default go_url">跳转</button>\n' +
-                        '          </div>\n' +
-                        '      </div>';
-                    html += "<hr/>";
-                    //已有链接列表
-                    html += '<div style="float: left;width: 50%;">';
-                    html += "<h3>已有链接</h3>";
-                    html += '<ul class="list-group" >\n' +
-                        '  <li class="list-group-item" title="分校小程序,测试1">http://www.swaggertest.com/apidoc/dist?num=module_37d8840a6834ae2f04b028076a8bfaf4</li>\n' +
-                        '  <li class="list-group-item" title="分校小程序,测试1">http://www.swaggertest.com/apidoc/dist?num=module_37d8840a6834ae2f04b028076a8bfaf4</li>\n' +
-                        '  <li class="list-group-item" title="分校小程序,测试1">http://www.swaggertest.com/apidoc/dist?num=module_37d8840a6834ae2f04b028076a8bfaf4</li>\n' +
-
-                        '</ul>';
-                    html += '</div>';
-                    html += "<hr class='dri'  style='float:left; height: 360px'/>";
-
-                    //模块列表(可生成链接)
-                    html += '<div style="float: right;width: 40%;">';
-                    html += "<h3>模块列表</h3>";
-                    html += '<div class="list-group modules-div ">';
-                    for (var i in jsonData) {
-                        html += '<button type="button" style="margin-bottom: 2px;" class="list-group-item">' + jsonData[i]['title'] + '</button>';
-                    }
-                    html += "</div></div>";
-                    html+="<div style='clear: both'></div>"
-                    html += "</div>"
-                    layer.closeAll();
-                    layer.open({
-                        type: 1,
-                        title: '模块列表选择',
-                        shade: 0.4,
-                        btn: ['生成链接'],
-                        btn1: function (index, layero) {
-                            // 获取选中的模块
-                            var div_m = $('.modules-div button.active');
-                            if (div_m.length < 1) {
-                                layer.msg('请选择要生成链接的模块');
-                                return;
-                            }
-                            //拼接模块
-                            var m = [];
-                            div_m.each(function () {
-                                m.push($(this).text())
-                            });
-                            modules = m.join(',');
-                            self.ajax({
-                                url: "",
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    type: 1,
-                                    modules: modules
-                                },
-                                success: function (jsonData) {
-                                    if (jsonData['status'] == 0) {
-
-                                        $('input[name=modules_url]').val(window.location.protocol + "//" + window.location.host + jsonData['data']['url']);
-                                    }
-                                },
-                                error: function () {
-                                    layer.msg('服务器或网络异常');
-                                }
-
-                            });
-
-                            //获取选中的列表
-                            //生成链接
-                        },
-                        //offset: 'c',
-                        // maxmin: true,
-                        skin: 'layui-layer-rim', //没有背景色
-                        area: ['800px'], //宽高
-                        content: html
+                    //拼接模块
+                    var m = [];
+                    div_m.each(function () {
+                        m.push($(this).text())
                     });
-                },
-                error: function (xr) {
-                    layer.msg('未发现对应的模块...', {icon: 2})
+                    modules = m.join(',');
+
+                    console.log(div_m);
+                    alert(modules);return;
                 }
             });
-
         })
     },
     /**
@@ -255,27 +168,38 @@ var ApiHelper = {
      * @param selector 选择器 ".mo"
      */
     blink: function (selector) {
-        var self=this;
+        var self = this;
         $(selector).fadeOut('slow', function () {
             $(this).fadeIn('slow', function () {
                 self.blink(this);
             });
         });
     },
-    ajax:function (params) {
+    /**
+     * 发送ajax请求（为了过滤）
+     * @param params
+     */
+    ajax: function (params) {
 
         //过滤成功回调
-        var fun=params['success'];
-        params['success']=function (jsonData) {
-                //说明权限验证未通过
-                if(jsonData.status=='1001'){
-                    window.location.reload();
-                    return;
-                }
-                fun(jsonData);
+        var fun = params['success'];
+        params['success'] = function (jsonData) {
+            //说明权限验证未通过
+            if (jsonData.status == '1001') {
+                window.location.reload();
+                return;
+            }
+            fun(jsonData);
         };
         //发送ajax请求
         $.ajax(params);
+    },
+    /**
+     * 拼接地址
+     * @param path
+     */
+    splicing_url:function(path){
+        return window.location.protocol + "//" + window.location.host + path;
     },
     //获取模块列表
     get_module_list: function () {

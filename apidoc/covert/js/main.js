@@ -2,5 +2,5 @@
 
 $(function () {
     //生成文档
-    window.ApiHelper.covert();
+    //window.ApiHelper.covert();
 })

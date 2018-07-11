@@ -19,7 +19,6 @@
     <script src="<?php echo API_COVERT_JS ?>/plug/layer-v3.1.1/layer/layer.js"></script>
     <script src="<?php echo API_COVERT_JS ?>/auth.js"></script>
     <style>
-
         .main{
           /*  text-align: center; *//*让div内部文字居中*/
            /* background-color: #fff;*/
@@ -51,16 +50,12 @@
                             <button class="btn btn-default btn-auth" type="button">Go!</button>
                         </div>
                         <span  id="msg"></span>
-
                     </div>
                 </div>
             </div>
 
         </div>
-
     </div>
-
-
 </div>
 </body>
 </html>

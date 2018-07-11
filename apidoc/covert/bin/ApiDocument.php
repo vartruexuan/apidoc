@@ -271,6 +271,7 @@ class ApiDocument
                     }
                 }
             }
+            closedir($hande);
         } catch (ApiDocumentException $se) {
             $this->moduleMessage[$module['title']]['status'] = 1001;
             $this->moduleMessage[$module['title']]['file_name'] = $fullpath;
@@ -299,7 +300,6 @@ class ApiDocument
      */
     private function file_format_json($path, &$comment = null, $ext_filter = "*")
     {
-
         if (!file_exists($path)) {
             throw new ApiDocumentException("{$path}文件不存在");
         }
@@ -559,6 +559,8 @@ class ApiDocument
         return $data;
     }
 
+    # 所有模块的json文件名(只在生成的是生成一次,用来在比较使用)
+    private   $module_all_name="module_all";
     /**
      * 生成模块json文件 并返回dist地址
      * @param $modules 模块列表([[title=>'模块1'],['title'=>'模块2']])
@@ -572,7 +574,7 @@ class ApiDocument
         }
         # 生成一个主模块文件
         if ($is_all) {
-            $json_name = "module_all";
+            $json_name = $this->module_all_name;
             $this->module_format($modules, $json_name);
         }
 
@@ -608,24 +610,103 @@ class ApiDocument
     {
         echo json_encode($data, true);
     }
+
+    /**
+     * 获取已经生成的module列表
+     * @return array
+     */
+    public function getAllModule()
+    {
+        $modules=[];
+        # 文件是否存在
+        $path=WEB_ROOT.API_DIST.'/json/module/'.$this->module_all_name.'.json';
+        if(file_exists($path)){
+            $json=file_get_contents($path);
+            $modules=json_decode($json,1);
+        }
+        # 读取数据
+        return $modules?$modules:[];
+    }
+
+    /**
+     * 获取已有的链接列表
+     * @return array
+     */
+    public function getAllModuleUrls()
+    {
+        # 打开目录 获取文件列表
+        $urls=[];
+        $dir=WEB_ROOT.API_DIST.'/json/module';
+        if(file_exists($dir)){
+            $dirObj=opendir($dir);
+            while ($file=readdir($dirObj)){
+                $fullpath=$dir.'/'.$file;
+                $info=pathinfo($fullpath);
+                $ext=$info['extension'];
+                $filename=$info['filename'];
+                # 筛选指定文件
+                if(!is_file($fullpath)||$ext!='json'||$filename==$this->module_all_name) {
+                    continue;
+                }
+                # 获取对应的模块列表
+                $modules=file_get_contents($fullpath);
+                $modules=json_decode($modules,true);
+                $modules=$modules?$modules:[];
+                $urls[$filename]=$modules;
+            }
+        }
+        return $urls?$urls:[];
+    }
 #################### 页面操作 ####################################
 
+    # 显示生成页面
     public function showCovertPage(){
         $this->showPage("covert");
     }
+    # 显示权限验证页面
     public function showAuthPage(){
         $this->showPage('auth');
+    }
+    # 显示生成链接页面
+    public function showBulidPage(){
+        if(array_key_exists('HTTP_REFERER',$_SERVER)){
+            //查询模块列表
+            $modules=$this->getAllModule();
+            //已有链接列表
+            $urls=$this->getAllModuleUrls();
+            $params['modules']=$modules;
+            $params['urls']=$urls;
+            $this->showPage('bulid_url','php',$params);
+        }else{
+            $this->redirectPage();
+        }
+
+    }
+    # 跳转指定页面
+    public function redirectPage($url=null){
+        $url=$url?$url:API_COVERT;
+        header('Location:'.$url);
     }
     /**
      * 显示指定页面
      * @param string $name 模板名
+     * @param array $params 需要导入到页面的参数 ['参数名'=>参数值]
      */
-    public function showPage($name = "covert", $ext = "php")
+    public function showPage($name = "covert", $ext = "php",$params=array())
     {
         header('Content_Type:text/html;charset=utf8');
+        # 导入参数
+        foreach($params as $k=>$v){
+            $$k=$v;
+        }
+        # 工具信息
+        $info=$this->getApiDocmentInfo();
+
+        # 公共消息
+        $public_msg=$this->config['public_message'];
         include("./template/" . $name . "." . $ext);
     }
-################  权限操作 #####################
+################  权限操作 start #####################
 
     /**
      * 验证权限

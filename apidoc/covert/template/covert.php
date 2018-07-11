@@ -21,15 +21,16 @@
 <!-- 配置数据 -->
 <div>
     <input type="hidden" name="api_root_name" value="<?php echo API_ROOT_NAME ?>">
-    <input type="hidden" name="api_covert" value="<?php echo API_COVERT ?>">
-    <input type="hidden" name="api_dist" value="<?php echo API_DIST ?>">
-    <input type="hidden" name="api_covert_img" value="<?php echo API_COVERT_IMG ?>">
+    <input type="hidden" name="page_covert" value="<?php echo API_COVERT ?>">
+    <input type="hidden" name="page_dist" value="<?php echo API_DIST ?>">
+    <input type="hidden" name="page_covert_img" value="<?php echo API_COVERT_IMG ?>">
 </div>
 
 <!-- 功能列表 -->
 <div class="div-box">
     <div class="bs-callout bs-callout-danger footer">
         <!-- 工具信息 -->
+        版本: <a><?php echo $info['version']?></a>
     </div>
     <div class="bs-callout bs-callout-warning header">
         <div>
@@ -40,22 +41,21 @@
         <!--  操作列表  -->
         <div>
             <div class="btn-group ">
-                <button class="btn btn-sm btn-primary" id="doc_refresh"><span class="glyphicon glyphicon-refresh"> 重新生成</span></button>
+                <button class="btn btn-sm btn-primary" id="doc_refresh"><span class="glyphicon glyphicon-refresh"> 生成文档</span></button>
                 <button class="btn btn-sm btn-success" id="modules_url"><span class="glyphicon glyphicon-random"> 指定模块生成链接</span></button>
-                <button class="btn btn-sm btn-danger" ><span class="glyphicon "> 待定</span></button>
+                <button class="btn btn-sm btn-danger" id="test"><span class="glyphicon "> 待定</span></button>
             </div>
         </div>
         <hr/>
-        <div class="message">
-
-        </div>
+        <!--  显示状态消息 -->
+        <div class="message"></div>
     </div>
     <div class="bs-callout bs-callout-info container module">
         <div>
             <span class="title">模块列表</span>&emsp;
             <span style="background: red;width: 10px;height: 10px;display: inline-block"> </span> 错误
             <span style="background: green;width: 10px;height: 10px;display: inline-block"> </span> 成功
-            &emsp;[<span class="covert-status"></span>]
+            &emsp;<span class="covert-status"></span>
         </div>
         <hr/>
         <div class="modules_status">

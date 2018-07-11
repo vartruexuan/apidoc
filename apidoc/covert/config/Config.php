@@ -44,7 +44,7 @@ return [
     #apidoc 公共配置
     'config' => [
         # 进入生成文档页面进行权限验证(不加验证留空即可)
-        "covert_password" => "123456789",
+        "covert_password" => "12345678",
         # 文档模块化
         "module" => array(
             [
@@ -95,6 +95,28 @@ return [
             [
                 #模块名称(不可重复)
                 "title" => '测试9',
+                # 版本
+                'version' => "1.0.0",
+                "description"=>"模块描述",
+                #注释文件所在目录(1. path=>"文件地址" 2.path=>"目录地址" 3. path=>["文件地址","目录地址"..])
+                "path"=>[
+                    # WEB_ROOT 是项目根目录,根据实用情况使用
+                    dirname(WEB_ROOT)."/module/live",
+                    dirname(WEB_ROOT).'\module\school\v1\admin\controllers\IndexController.php'
+                ],
+
+                #递归层级(正数(5):递归最大层级,0:不递归，-1：无限递归[默认] )
+                "depath" => -1,
+                # 主机地址(接口访问地址)[不配置则是使用主配置的host]
+                "host" => "",
+                # 标签说明(针对于此模块tags说明)
+                "tags" => array(
+                    ['name'=>'标签名称','description'=>'标签描述'],
+                ),
+            ],
+            [
+                #模块名称(不可重复)
+                "title" => '测试456',
                 # 版本
                 'version' => "1.0.0",
                 "description"=>"模块描述",

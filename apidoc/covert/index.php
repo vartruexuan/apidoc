@@ -10,22 +10,30 @@ $apiobj = ApiDocument::getObj();
 # 获取配置 权限验证
 
 # get 展示生成页面
-if (strtolower($_SERVER['REQUEST_METHOD']) == 'get') {
+$method=strtolower($_SERVER['REQUEST_METHOD']);
+if ( $method== 'get') {
+    $page=isset($_GET['page'])?$_GET['page']:0;
 
     if (!$apiobj->checkAuth()) {
+        //显示验证窗口
         $apiobj->showAuthPage();
     } else {
-        $apiobj->showCovertPage();
+        //显示主页面窗口
+        if($page==0){
+            $apiobj->showCovertPage();
+
+        }else if($page==1){
+            $apiobj->showBulidPage();
+        }
     }
 
 #post 生成文档 并返回数据
-} else {
+} elseif($method == 'post') {
     /*
      *      type
      *              0.生成文档
      *              1.生成模块链接
      *              2.验证权限
-     *
      */
     $auth_types = [0, 1];
     $type = isset($_POST['type']) ? $_POST['type'] : 0;
@@ -53,7 +61,7 @@ if (strtolower($_SERVER['REQUEST_METHOD']) == 'get') {
             $data['url'] = $url;
             $return_data = $apiobj->returnSuccess($data);
         }
-        # 权限验证
+    # 权限验证
     } elseif ($type == 2) {
         $pwd = isset($_POST['pwd']) ? $_POST['pwd'] : '';
         $return_data = $apiobj->returnSuccess();
@@ -66,6 +74,7 @@ if (strtolower($_SERVER['REQUEST_METHOD']) == 'get') {
         $return_data = $apiobj->module_fromat_json();
     }
 
+    # 获取工具版本信息
     $return_data['data']['info'] = $apiobj->getApiDocmentInfo();
     $apiobj->asJson($return_data);
 
