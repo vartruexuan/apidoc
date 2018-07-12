@@ -1,5 +1,5 @@
 {
-    "name": "php/apidoc",
+    "name": "guozhaoxuan/php-apidoc",
     "description": "php接口文档生成调试工具",
     "version": "1.0.0",
     "license": "Apache-2.0",
