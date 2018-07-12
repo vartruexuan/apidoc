@@ -1,0 +1,12 @@
+{
+    "name": "guozhaoxuan/apidoc",
+    "description": "php接口文档生成工具",
+    "authors": [
+        {
+            "name": "guozhaoxuan",
+            "email": "1175398345@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
