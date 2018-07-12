@@ -1,19 +1,19 @@
 {
-    "name": "php/apidoc",
-    "description": "php接口文档生成工具",
-    "version": "1.0.0",
-    "authors": [
-        {
-            "name": "郭昭璇",
-            "email": "1175398345@qq.com"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/XiaoGuoZhaoXuan/apidocument/apidoc"
-    },
-    "require": {
-        "php": ">=5.6.0"
-    },
-    "minimum-stability": "stable",
-    "require": {}
+  "name": "php/apidoc",
+  "description": "php接口文档生成工具",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "郭昭璇",
+      "email": "1175398345@qq.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/XiaoGuoZhaoXuan/apidocument/apidoc"
+  },
+  "require": {
+    "php": ">=5.6.0"
+  },
+  "minimum-stability": "stable",
+  "require": {}
 }
