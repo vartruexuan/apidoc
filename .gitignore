@@ -1,0 +1,7 @@
+.htaccess
+index.php
+assets
+uploads
+.DS_Store
+apidoc/dist/json
+!.gitignore

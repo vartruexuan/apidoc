@@ -1,0 +1,23 @@
+html
+{
+    box-sizing: border-box;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+}
+
+*,
+*:before,
+*:after
+{
+    box-sizing: inherit;
+}
+
+body
+{
+    margin:0;
+    background: #fafafa;
+}
+/*  layer 弹出框样式  */
+.layer-self{
+    border:4px solid #0D3349;
+}
