@@ -1,12 +1,24 @@
 {
     "name": "guozhaoxuan/apidoc",
-    "description": "php接口文档生成工具",
+    "description": "php接口文档生成调试工具",
+    "version": "1.0.0",
+    "license": "Apache-2.0",
     "authors": [
         {
-            "name": "guozhaoxuan",
+            "name": "郭昭璇",
             "email": "1175398345@qq.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/XiaoGuoZhaoXuan/apidoc"
+    },
+    "require": {
+        "php": ">=5.6.0"
+    },
     "minimum-stability": "stable",
+    "autoload": {
+
+    },
     "require": {}
+
 }
