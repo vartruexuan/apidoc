@@ -15,12 +15,15 @@
     <title>Document</title>
     <link rel="stylesheet" href="<?php echo API_COVERT_JS ?>/plug/bootstrap-3.3.7-dist/css/bootstrap.css">
     <script src="<?php echo API_COVERT_JS ?>/plug/jquery.js"></script>
-    <script type="application/javascript"
     <script src="<?php echo API_COVERT_JS ?>/plug/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
     <script src="<?php echo API_COVERT_JS ?>/bulid_url.js"></script>
     <style>
-        .module-list >a{
+        .urls-list>a,.module-list >a{
             margin-bottom: 4px;
+        }
+        .urls-list,.module-list{
+            height: 300px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -29,7 +32,10 @@
     <div class="row">
         <!-- url 列表 -->
         <div class="col-md-6 col-xs-6 col-sm-6">
-            <h1>已有链接</h1>
+            <h1>已有链接
+                <span class="label label-danger" style="font-size: 12px"> 错误</span>
+                <span class="label label-primary" style="font-size: 12px">成功 </span>
+            </h1>
             <div class="list-group urls-list">
                 <!-- 遍历模块列表-->
                 <?php foreach ($urls as $k=>$u){   ?>
@@ -37,7 +43,15 @@
                     <span class="btn url-del" style="background: white; color: black" title="删除链接">
                         <span class="glyphicon glyphicon-trash"style="color:red;"></span>
                     </span>
-                    <span class="module_names"><?= implode(',',array_column($u,'title'))?></span>
+                    <span class="module_names">
+                                   <?php
+                                         $titles=array_column($u,'title');
+                                         $all_module=array_column($modules,'title');
+                                        foreach ( $titles as $t){ ?>
+                                       <span class="module-item label <?= (in_array($t,$all_module)?'label-primary':'label-danger')?>"><?=$t?></span>
+                                   <?php }?>
+
+                    </span>
                 </a>
                 <?php } ?>
             </div>

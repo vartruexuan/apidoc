@@ -38,6 +38,7 @@ var ApiHelper = {
      * @returns {ApiHelper}
      */
     set_module_status: function (modules) {
+        $('.covert-status').html('');
         var total_count = 0;
         var error_count = 0;
         var success_count = 0;
@@ -57,7 +58,6 @@ var ApiHelper = {
         //错误数量大于0 闪烁提醒
         if (error_count > 0) {
             this.blink('.module_error');
-
         }
         return this;
     },
@@ -110,7 +110,7 @@ var ApiHelper = {
             beforeSend: function () {
                 $('.tab-container .nav-tabs').html('');
                 $('.tab-container .tab-content').html('');
-                $('.modules_status').html('<a style="font-size: 20px;"><img mou height="200px" src="' + page_covert_img + '/load.gif"/> 正在生成文档中.....</a>');
+                $('.modules_status').html('<a style="font-size: 20px;"><img mou height="30px" src="' + page_covert_img + '/load.gif"/> 正在生成文档中.....</a>');
             },
             success: function (jsonData) {
                 self.module_url = jsonData.data.url;
@@ -139,7 +139,7 @@ var ApiHelper = {
                 shade: [0.5],
                 offset:'ct',
                // maxmin: true, //开启最大化最小化按钮
-                area: ['900px', '400px'],
+                area: ['900px', '500px'],
                 content: page_bulid_url,
                 //btn: ['生成'],
                 btn1: function (index, layero) {
@@ -201,9 +201,26 @@ var ApiHelper = {
     splicing_url:function(path){
         return window.location.protocol + "//" + window.location.host + path;
     },
-    //获取模块列表
-    get_module_list: function () {
-
+    //数组取交集
+    array_intersect:function () {
+        var result = new Array();
+        var obj = {};
+        for (var i = 0; i < arguments.length; i++) {
+            for (var j = 0; j < arguments[i].length; j++) {
+                var str = arguments[i][j];
+                if (!obj[str]) {
+                    obj[str] = 1;
+                }
+                else {
+                    obj[str]++;
+                    if (obj[str] == arguments.length)
+                    {
+                        result.push(str);
+                    }
+                }//end else
+            }//end for j
+        }//end for i
+        return result;
     }
 
 };

@@ -45,10 +45,11 @@
                     </div>
                     <div class="panel-body" style="min-height: 200px;">
                         <div class="input-group">
-                            <input type="text" name="pwd" class="form-control" placeholder="请输入密码..">
+                            <input type="password" name="pwd" class="form-control" placeholder="请输入密码..">
                             <span class="input-group-btn">
                             <button class="btn btn-default btn-auth" type="button">Go!</button>
                         </div>
+                        <br>
                         <span  id="msg"></span>
                     </div>
                 </div>

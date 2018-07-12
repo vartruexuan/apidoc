@@ -103,6 +103,7 @@ class ApiDocument
         define("API_COVERT_IMG", implode("/", array(API_COVERT, "img")));//img目录地址
         define("API_COVERT_JS", implode("/", array(API_COVERT, "js")));//js目录地址
         define("API_COVERT_CSS", implode("/", array(API_COVERT, "css")));//css目录地址
+        define("API_DIST_JSON",implode("/",array(API_DIST,'json')));//dist/json
         ### 默认设置 ###
         ini_set('max_execution_time', '0');//不限制页面执行时间
         date_default_timezone_set("Asia/Shanghai");//设置时区
@@ -493,6 +494,8 @@ class ApiDocument
     {
         $data = $this->returnSuccess();
         try {
+            # 先删除之前生成的json文件
+            $this->delFile(WEB_ROOT.API_DIST_JSON);
             # 获取模块列表
             $module = $this->config['module'];
 
@@ -572,6 +575,8 @@ class ApiDocument
         if (!$modules) {
             return "";
         }
+        # 排序(保证不同顺序，但一样模块集合，生成文件是同一个)
+        sort($modules);
         # 生成一个主模块文件
         if ($is_all) {
             $json_name = $this->module_all_name;
@@ -586,29 +591,6 @@ class ApiDocument
 
         # 返回链接
         return API_DIST . '?num=' . $json_name;
-    }
-
- ################### 工具信息操作  ########################
-    /**
-     * 获取工具信息(版本..)
-     * @return array
-     */
-    public function getApiDocmentInfo()
-    {
-
-        return array(
-            'version' => $this->version,
-            'date' => date('Y-m-d H:i:s', time()),
-        );
-    }
-
-    /**
-     * 转jsons数据并输出
-     * @param $data
-     */
-    public function asJson($data)
-    {
-        echo json_encode($data, true);
     }
 
     /**
@@ -668,11 +650,34 @@ class ApiDocument
         if($num==$this->module_all_name||!file_exists($path)){
             return $this->returnError('文件不存在');
         }
-       if( !@unlink($path)){
+        if( !@unlink($path)){
             return $this->returnError('删除文件失败');
-       }
-       return $this->returnSuccess();
+        }
+        return $this->returnSuccess();
     }
+ ################### 工具信息操作  ########################
+    /**
+     * 获取工具信息(版本..)
+     * @return array
+     */
+    public function getApiDocmentInfo()
+    {
+
+        return array(
+            'version' => $this->version,
+            'date' => date('Y-m-d H:i:s', time()),
+        );
+    }
+
+    /**
+     * 转jsons数据并输出
+     * @param $data
+     */
+    public function asJson($data)
+    {
+        echo json_encode($data, true);
+    }
+
 #################### 页面操作 ####################################
 
     # 显示生成页面
@@ -685,7 +690,10 @@ class ApiDocument
     }
     # 显示生成链接页面
     public function showBulidPage(){
-        if(array_key_exists('HTTP_REFERER',$_SERVER)){
+
+        $ref=array_key_exists('HTTP_REFERER',$_SERVER)?$_SERVER['HTTP_REFERER']:'';
+        $upath=  substr($ref,strpos($ref,'/',8));
+        if($ref && in_array($upath,[API_COVERT,API_COVERT.'/'])){
             //查询模块列表
             $modules=$this->getAllModule();
             //已有链接列表
@@ -774,5 +782,26 @@ class ApiDocument
     public function returnSuccess($data=array(),$message=''){
         $data=array('status'=>0,'message'=>$message,'data'=>$data);
         return $data;
+    }
+##################### 文件操作 #########################
+
+    /**
+     * 删除指定目录下的文件，不删除目录文件夹
+     * @param $dirName 目录地址
+     * @return bool
+     */
+    public function delFile($dirName,$is_depath=false){
+        if(file_exists($dirName) && $handle=opendir($dirName)){
+            while(false!==($item = readdir($handle))){
+                if($item!= "." && $item != ".."){
+                    if(file_exists($dirName.'/'.$item) && is_dir($dirName.'/'.$item)&&$is_depath){
+                        $this->delFile($dirName.'/'.$item,$is_depath);
+                    }else{
+                       @unlink($dirName.'/'.$item);
+                    }
+                }
+            }
+            closedir( $handle);
+        }
     }
 }

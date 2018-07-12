@@ -27,8 +27,8 @@
 </div>
 
 <!-- 功能列表 -->
-<div class="div-box">
-    <div class="bs-callout bs-callout-danger footer">
+<div class="div-box" >
+    <div class="bs-callout bs-callout-danger footer" >
         <!-- 工具信息 -->
         版本: <a><?php echo $info['version']?></a>
     </div>
@@ -61,7 +61,7 @@
         <div class="modules_status">
 
         </div>
-        <div class="tab-container">
+        <div class="tab-container" style="background:no-repeat url(<?= API_COVERT_IMG?>/xhr25_1366.png);background-size:100% 100%">
             <!-- tabs 标题区-->
             <ul class="nav nav-tabs" role="tablist">
                <!-- <li role="presentation" class="active"><a href="#home" role="tab" data-toggle="tab">Home</a></li>-->

@@ -5,6 +5,8 @@
  * Time: 11:26
  */
 $(function () {
+    //获取焦点
+    $('input[name=pwd]').focus()
     //绑定密码验证
     $('.btn-auth').on('click',function () {
         //获取密码值
@@ -16,6 +18,18 @@ $(function () {
         checkpwd(pwd);
 
     })
+    /**
+     * 加上回车确定
+     */
+    $('body').unbind('keydown').on('keydown', function(e){
+
+        if(e.keyCode == 13){
+
+            $(document).find('.btn-auth').click();
+
+        }
+
+    });
 })
 
 function checkpwd(pwd) {
@@ -38,12 +52,18 @@ function checkpwd(pwd) {
     })
 }
 var timer=null;
+
+/**
+ *
+ * @param msg
+ * @param type error success
+ */
 function showMsg(msg) {
-    $('#msg').text(msg);
+    $('#msg').html("<span style='color:red'>"+msg+"</span>");
     if(timer){
         clearTimeout(timer);
     }
      timer=setTimeout(function () {
-        $('#msg').text('');
+        $('#msg').html('');
     },3000)
 }

@@ -58,6 +58,7 @@ if ( $method== 'get') {
             foreach ($modules as $m) {
                 $ms[] = array('title' => $m);
             }
+
             $url = $apiobj->bulid_module_url($ms);
             $data['url'] = $url;
             $return_data = $apiobj->returnSuccess($data);
