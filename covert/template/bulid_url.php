@@ -35,7 +35,7 @@
             <h2 class="page-header">已有链接
                 <span class="label label-danger" style="font-size: 12px"> 错误</span>
                 <span class="label label-primary" style="font-size: 12px">成功 </span>
-            </h1>
+            </h2>
             <div class="list-group urls-list">
                 <!-- 遍历模块列表-->
                 <?php foreach ($urls as $k=>$u){   ?>
