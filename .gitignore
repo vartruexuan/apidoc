@@ -1,8 +1,2 @@
-.htaccess
-index.php
-assets
-uploads
-.DS_Store
-apidoc/dist/json
+dist/json
 !.gitignore
-/vendor/
