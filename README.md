@@ -6,13 +6,49 @@
 
 
 > ## 安装 ##
-* **先把代码克隆到项目根目录下**
+* **github克隆到项目根目录下**
 ```git
 git clone https://github.com/XiaoGuoZhaoXuan/apidoc.git
 ```
-或者composer安装
+**或者composer安装**
 ```composer
 composer require guozhaoxuan/php-apidoc
+```
+> ## 注释规范 ##
+```php
+ /**SUNLANDS
+  * @url    url地址
+  * @method 请求方式
+  * @tags   标签1 标签2
+  * @description 接口具体描述
+  * @summary     接口总结概括
+  * @param 参数类型 参数名 默认值(无写/) 所在位置 参数描述 是否必填(true/false) 值为空时是否发送(true/false)
+  * @examples{
+    "application/json":{
+
+      此处放接口返回的数据案例
+    }
+  }
+  *
+  */
+```
+案例
+```php
+ /**SUNLANDS
+  * @url    url地址
+  * @method 请求方式
+  * @tags   标签1 标签2
+  * @description 接口具体描述
+  * @summary     接口总结概括
+  * @param 参数类型 参数名 默认值(无写/) 所在位置 参数描述 是否必填(true/false) 值为空时是否发送(true/false)
+  * @examples{
+    "application/json":{
+
+      此处放接口返回的数据案例
+    }
+  }
+  *
+  */
 ```
 > ## 使用 ##
 1. 修改 apidoc/covert/config/config.php 可看文件有详细注释
