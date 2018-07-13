@@ -1,3 +1,6 @@
+> ## 作者大大发言 ##
+ 1. 如有啥问题bug, 请发送邮件到 1175398345@qq.com
+ 2. 当然如果觉得该工具还行,请轻轻触动你的鼠标在上面点颗星(★Star)鼓励鼓励吧
 > ## 概要 ##
  1. 这是一个php注释生成接口文档调试工具
  2. 支持模块化
@@ -34,21 +37,17 @@ composer require guozhaoxuan/php-apidoc
 ```
 案例
 ```php
- /**SUNLANDS
-  * @url    url地址
-  * @method 请求方式
-  * @tags   标签1 标签2
-  * @description 接口具体描述
-  * @summary     接口总结概括
-  * @param 参数类型 参数名 默认值(无写/) 所在位置 参数描述 是否必填(true/false) 值为空时是否发送(true/false)
-  * @examples{
-    "application/json":{
-
-      此处放接口返回的数据案例
-    }
-  }
-  *
-  */
+    /**SUNLANDS
+     * @url   /v1/frontend/test/detail
+     * @method post
+     * @tags   小程序接口
+     * @description 测试详情
+     * @summary     测试详情
+     * @param number  lon / formData 经度
+     * @param number  lat / formData 纬度
+     * @param integer school_id / formData 特使id true
+     * @return 200 成功返回描述
+     */
 ```
 > ## 使用 ##
 1. 修改 apidoc/covert/config/config.php 可看文件有详细注释
