@@ -8,16 +8,13 @@
 return [
     # 主json配置信息
     'server_info' => [
-      'swagger' => '2.0',
+
         # 文档的一些信息
         'info' => array(
-            'version' => "1.0.0",//版本信息
-            'title' => 'cronus系统接口文档',//文档名称()
-            'description' => '访问每个接口都必须在请求头加入该头部： token:访问token',
-            'contact' => array('name' => 'aaa'),
-            'license' => array('name' => 'MIT'),
+            'version' => "1.0.0",//全局模块版本
+            'description' => '全局模块描述',//全局模块描述
         ),
-        # 主机地址(接口访问地址)
+        # 主机地址(接口访问地址),无特殊需求无需修改
         'host' => $_SERVER['HTTP_HOST'],
         # 父地址，可以是模块名 : /api
         'basePath' => '',
@@ -36,8 +33,7 @@ return [
 
         # 标签信息-(针对所有模块)
         'tags' => array(
-            #['name'=>'分校小程序-首页','description'=>'(顶部banner,附近校区,推荐课程)'],
-            #['name'=>'分校后台-素材管理','description'=>'(素材管理,)'],
+            #['name'=>'标签名称','description'=>'标签描述'],
         ),
     ],
 
@@ -49,7 +45,7 @@ return [
         "module" => array(
             [
                 #模块名称(不可重复)
-                "title" => '测试7',
+                "title" => '后台接口',
                 # 版本
                 'version' => "1.0.0",
                 "description"=>"模块描述",
@@ -58,11 +54,8 @@ return [
                     # WEB_ROOT 是项目根目录,根据实用情况使用
                     dirname(WEB_ROOT)."/module/wifi",
                     dirname(WEB_ROOT)."/module/live",
-                    dirname(WEB_ROOT).'\module\school\v1\admin\controllers\IndexController.php'
+                    dirname(WEB_ROOT).'/module/school/v1/admin/controllers/IndexController.php'
                 ],
-
-                #递归层级(正数(5):递归最大层级,0:不递归，-1：无限递归[默认] )
-                "depath" => -1,
                 # 主机地址(接口访问地址)[不配置则是使用主配置的host]
                 "host" => "",
                 # 标签说明(针对于此模块tags说明)
@@ -82,9 +75,6 @@ return [
                     dirname(WEB_ROOT)."/module/live",
                     dirname(WEB_ROOT).'\module\school\v1\admin\controllers\IndexController.php'
                 ],
-
-                #递归层级(正数(5):递归最大层级,0:不递归，-1：无限递归[默认] )
-                "depath" => -1,
                 # 主机地址(接口访问地址)[不配置则是使用主配置的host]
                 "host" => "www.baidu.com",
                 # 标签说明(针对于此模块tags说明)
@@ -102,11 +92,8 @@ return [
                 "path"=>[
                     # WEB_ROOT 是项目根目录,根据实用情况使用
                     dirname(WEB_ROOT)."/module/live",
-                    dirname(WEB_ROOT).'\module\school\v1\admin\controllers\IndexController.php'
+                    dirname(WEB_ROOT).'/module/school/v1/admin/controllers/IndexController.php'
                 ],
-
-                #递归层级(正数(5):递归最大层级,0:不递归，-1：无限递归[默认] )
-                "depath" => -1,
                 # 主机地址(接口访问地址)[不配置则是使用主配置的host]
                 "host" => "",
                 # 标签说明(针对于此模块tags说明)

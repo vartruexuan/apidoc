@@ -31,7 +31,7 @@ class ApiDocument
      * 版本
      * @var string
      */
-    private $version = "apidoc-sunlands 3.0";
+    private $version = "php-apidoc 1.0";
     /**
      * 公共配置
      * @var array
