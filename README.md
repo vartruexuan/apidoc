@@ -7,6 +7,11 @@
 
 > ## 安装 ##
 * **先把代码克隆到项目根目录下**
-```Java
-git clone 
+```git
+git clone https://github.com/XiaoGuoZhaoXuan/apidoc.git
 ```
+或者composer安装
+```composer
+composer require guozhaoxuan/php-apidoc
+```
+
