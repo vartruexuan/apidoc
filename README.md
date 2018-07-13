@@ -6,6 +6,7 @@
 
 
 > ## 安装 ##
+* **先把代码克隆到项目根目录下**
 ```Java
-public static void main(String[] args){}
+git clone 
 ```
