@@ -4,5 +4,8 @@
 > 3. 生成文档支持权限验证
 > 4. 可指定模块生成链接
 
-> # 教程 #
-> > ## 安装 ##
+
+> ## 安装 ##
+```Java
+public static void main(String[] args){}
+```
