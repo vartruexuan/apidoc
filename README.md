@@ -18,8 +18,11 @@ composer require guozhaoxuan/php-apidoc
 1. 修改 apidoc/covert/config/config.php 可看文件有详细注释
   * 增加一个模块(这里以yii框架为案例)
 ```php
- 'config' => [
-        # 模块列表,可多个
+     #apidoc 公共配置
+    'config' => [
+        # 进入生成文档页面进行权限验证(不加验证留空即可)
+        "covert_password" => "1234567",
+        # 模块列表
         "module" => array(
             [
                 #模块名称(不可重复)
@@ -30,13 +33,10 @@ composer require guozhaoxuan/php-apidoc
                 #注释文件所在目录(1. path=>"文件地址" 2.path=>"目录地址" 3. path=>["文件地址","目录地址"..])
                 "path"=>[
                     # WEB_ROOT 是项目根目录,根据实用情况使用
-                    dirname(WEB_ROOT)."/module/livebk",
-                    dirname(WEB_ROOT)."/module/live",
-                    dirname(WEB_ROOT).'/module/school/v1/admin/controllers/IndexController.php'
+                    dirname(WEB_ROOT)."/module/m1",
+                    dirname(WEB_ROOT)."/module/m2",
+                    dirname(WEB_ROOT).'/module/v1/controllers/IndexController.php'
                 ],
-
-                #递归层级(正数(5):递归最大层级,0:不递归，-1：无限递归[默认] )
-                "depath" => -1,
                 # 主机地址(接口访问地址)[不配置则是使用主配置的host]
                 "host" => "",
                 # 标签说明(针对于此模块tags说明)
@@ -44,20 +44,58 @@ composer require guozhaoxuan/php-apidoc
                     ['name'=>'标签名称','description'=>'标签描述'],
                 ),
             ],
+            [
+                #模块名称(不可重复)
+                "title" => '前台接口',
+                # 版本
+                'version' => "1.0.0",
+                "description"=>"模块描述",
+                #注释文件所在目录(1. path=>"文件地址" 2.path=>"目录地址" 3. path=>["文件地址","目录地址"..])
+                "path"=>dirname(WEB_ROOT)."/module/frontend",
+                # 主机地址(接口访问地址)[不配置则是使用主配置的host]
+                "host" => "www.baidu.com",
+                # 标签说明(针对于此模块tags说明)
+                "tags" => array(
+                  /*  ['name'=>'标签名称','description'=>'标签描述'],*/
+                ),
+            ],
+        ),
+        #公共参数--所有接口
+        "public_params" => array(
+            # 案例参数
+            [
+                # 参数名称
+                'name' => 'token',
+                # 参数所在位置( "query", "header", "path", "formData" , "body")
+                'in' => 'header',
+                # 默认值
+                'default' => '_iZXPgfXGrjHPTjCbxkKPdyIIGyThDjV',
+                # 参数描述
+                'description' => '访问token(此参数为所有接口的公共参数)',
+                # 不需要添加的路由(可写通配符或绝对  /controller/*)
+                'not_add_url' => array(
+                    "/backend/v1/frontend/*"
+                ),
             ]
+        ),
+        #公共提示消息--当showMessage时显示的公共消息
+        "public_message" => array(
+            "啦啦啦"
+        ),
+        # 定界符
+        "delimiter" => "SUNLANDS"
+    ],
+]
 ```
-  * 修改host(无特殊需求无需修改)
+  * 全局配置(无特殊需求无需修改)
   ```php
-   # 主json配置信息
+       # 主json配置信息
     'server_info' => [
-      'swagger' => '2.0',
         # 文档的一些信息
         'info' => array(
             'version' => "1.0.0",//版本信息
-            'title' => 'cronus系统接口文档',//文档名称()
-            'description' => '访问每个接口都必须在请求头加入该头部： token:访问token',
-            'contact' => array('name' => 'aaa'),
-            'license' => array('name' => 'MIT'),
+            'title' => '全局模块标题',//模块中有则覆盖该字段
+            'description' => '全局模块描述',//模块中有则覆盖该字段
         ),
         # 主机地址(接口访问地址)
         'host' => $_SERVER['HTTP_HOST'],
@@ -76,12 +114,13 @@ composer require guozhaoxuan/php-apidoc
             'application/json',
         ),
 
-        # 标签信息-(针对所有模块)
+        # 标签信息-(全局模块的标签描述)
         'tags' => array(
             #['name'=>'分校小程序-首页','description'=>'(顶部banner,附近校区,推荐课程)'],
             #['name'=>'分校后台-素材管理','description'=>'(素材管理,)'],
         ),
     ],
   ```
-   2. 浏览器中直接访问 http://项目域名.com/apidoc/covert
+   2. 浏览器中直接访问 ## 项目域名.com/apidoc/covert
+   
    
