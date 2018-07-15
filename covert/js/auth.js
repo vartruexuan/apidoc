@@ -32,6 +32,10 @@ $(function () {
     });
 })
 
+/**
+ *  验证密码
+ * @param pwd
+ */
 function checkpwd(pwd) {
     $.ajax({
         url:"",
@@ -46,7 +50,7 @@ function checkpwd(pwd) {
                 showMsg(jsonData.message);
             }else{
                 //验证成功刷新页面
-                window.location.reload();
+                top.window.location.reload();
             }
         }
     })
@@ -54,7 +58,7 @@ function checkpwd(pwd) {
 var timer=null;
 
 /**
- *
+ * 显示消息
  * @param msg
  * @param type error success
  */

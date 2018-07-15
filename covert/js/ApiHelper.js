@@ -1,7 +1,7 @@
 //*********ApiHelper.js 核心操作对象************
 var ApiHelper = {
-    module_name:"",
-    module_url:"",
+    module_name:"",//生成后的第一个链接名
+    module_url:"",//生成后的第一个文档链接
     //初始化
     init: function () {
         self = this;
@@ -20,7 +20,11 @@ var ApiHelper = {
         this.bind_build_url();
         return this;
     },
-    //设置生成文档状态
+    /**
+     * 设置生成文档状态
+     * @param jsonData 发送生成返回的数据
+     * @returns {ApiHelper}
+     */
     set_covert_status: function (jsonData) {
         if (jsonData.status == 0 && jsonData.data.url) {//成功
             $('.message').html('<a href="' + jsonData.data.url + '" class="go_to_dist" target="_blank"><span class="glyphicon glyphicon-hand-right"> 访问接口文档</span></a>');
@@ -32,9 +36,7 @@ var ApiHelper = {
     },
     /**
      *  设置模块生成状态
-     * @param count 总数量
-     * @param error 失败数量
-     * @param success 成功数量
+     * @param modules 生成时返回,模块列表信息
      * @returns {ApiHelper}
      */
     set_module_status: function (modules) {
@@ -61,7 +63,11 @@ var ApiHelper = {
         }
         return this;
     },
-    //添加模块列表
+    /**
+     * 添加模块列表
+     * @param modules 生成时返回,模块列表信息
+     * @returns {ApiHelper}
+     */
     append_module: function (modules) {
         this.set_module_status(modules);
         var id_index = 0;
@@ -92,14 +98,20 @@ var ApiHelper = {
         $('.tab-container .nav-tabs li a:eq(0)').trigger('click');
         return this;
     },
-    //展示版本信息
+    /**
+     * 展示版本信息
+     * @param info
+     */
     show_info: function (info) {
         $('.footer').html('');
         $('.footer').append('版本: <a>' + info['version'] + "</a>");
         $('.footer').append('生成时间: <a>' + info['date'] + "</a>");
     },
 
-    //生成文档
+    /**
+     * 生成文档
+     * @returns {ApiHelper}
+     */
     covert: function () {
         var self = this;
         //生成文档
@@ -129,7 +141,9 @@ var ApiHelper = {
         })
         return this;
     },
-    //绑定生成链接事件
+    /**
+     * 绑定生成链接事件
+     */
     bind_build_url: function () {
         $('#modules_url').on('click', function () {
             layer.open({
@@ -186,7 +200,7 @@ var ApiHelper = {
         params['success'] = function (jsonData) {
             //说明权限验证未通过
             if (jsonData.status == '1001') {
-                window.location.reload();
+                top.window.location.reload();
                 return;
             }
             fun(jsonData);
@@ -201,7 +215,10 @@ var ApiHelper = {
     splicing_url:function(path){
         return window.location.protocol + "//" + window.location.host + path;
     },
-    //数组取交集
+    /**
+     * 数组取交集
+     * @returns {Array}
+     */
     array_intersect:function () {
         var result = new Array();
         var obj = {};

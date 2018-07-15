@@ -8,6 +8,7 @@
 require __DIR__ . '/ErrorCode.php';
 require __DIR__ . '/CommentParser.php';
 require __DIR__ . '/ApiDocumentException.php';
+require __DIR__ . '/Session.php';
 
 class ApiDocument
 {
@@ -323,7 +324,7 @@ class ApiDocument
     }
 
     /**
-     *  将数据转未json写入到指定文件中
+     *  将数据转为json写入到指定文件中
      */
     private function putFile($file_name, $data)
     {
@@ -475,7 +476,7 @@ class ApiDocument
         if (is_file($module_path)) {
             unlink($module_path);
         }
-        # 过滤
+        # 过滤 -- 在配置文件存在该模块的,保存 title
         $modules_new = [];
         foreach ($modules as $m) {
             $titles = array_column($this->config['module'], 'title');
@@ -744,14 +745,22 @@ class ApiDocument
        }
 
        # 设置密码了--不存在$_SESSION['apidoc_auth']
-       if(!array_key_exists('apidoc_auth',$_SESSION)){
+       /*if(!array_key_exists('apidoc_auth',$_SESSION)){
            return false;
        }
+
        # 设置密码了---验证密码
        if(md5($this->config['covert_password'])==$_SESSION['apidoc_auth']){
            return true;
        }
-       unset($_SESSION['apidoc_auth']);
+       unset($_SESSION['apidoc_auth']);*/
+        $apidoc_auth=Session::get('apidoc_auth');
+        if(!$apidoc_auth){
+            return false;
+        }
+        if(md5($this->config['covert_password'])==$apidoc_auth){
+            return true;
+        }
        return false;
     }
 
@@ -769,7 +778,8 @@ class ApiDocument
         # 配置中存在密码
         if(md5($this->config['covert_password'])==$pwd){
             # 添加session
-            $_SESSION['apidoc_auth']=$pwd;
+           // $_SESSION['apidoc_auth']=$pwd;
+            Session::set('apidoc_auth',$pwd,3600*4);
             return true;
         }
         return false;
