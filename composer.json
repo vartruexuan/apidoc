@@ -17,10 +17,5 @@
     "require": {
         "php": ">=5.6.0"
     },
-    "minimum-stability": "stable",
-    "autoload": {
-
-    },
-    "require": {}
-
+    "minimum-stability": "stable"
 }
