@@ -10,7 +10,7 @@
 ```git
 git clone https://github.com/XiaoGuoZhaoXuan/apidoc.git
 ```
-**或者composer安装**
+* **或者composer安装**
 ```composer
 composer require guozhaoxuan/php-apidoc
 ```
