@@ -415,7 +415,9 @@ class ApiDocument
             }
             #解析标签
             if (array_key_exists('tags', $info)) {
-                $data['tags'] = explode(' ', $info['tags']);
+                $data['tags'] = array_filter(explode(' ', $info['tags']), function ($v) {
+                    return !(trim($v) === "");
+                });
             }
             #解析标识 operationId
             if (array_key_exists('operationId', $info)) {
