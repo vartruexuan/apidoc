@@ -15,13 +15,13 @@ html
 body
 {
     margin:0;
-    background: #fafafa;
+    background: #eed3d7;
 }
 /*  layer 弹出框样式  */
 .layer-self{
     border:4px solid #0D3349;
 }
-div.layui-layer-title{
+#layui-layer1 div.layui-layer-title{
 
     background-color: #2aabd2;
 }

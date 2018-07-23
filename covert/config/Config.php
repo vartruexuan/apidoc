@@ -48,7 +48,7 @@ return [
                 "title" => '后台接口',
                 # 版本
                 'version' => "1.0.0",
-                "description"=>"模块描述",
+                "description"=>"dsvsdvsdv",
                 #注释文件所在目录(1. path=>"文件地址" 2.path=>"目录地址" 3. path=>["文件地址","目录地址"..])
                 "path"=>[
                     # WEB_ROOT 是项目根目录,根据实用情况使用
