@@ -1,26 +1,75 @@
-<!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>apidoc UI</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>apidoc</title>
+    <link rel="stylesheet" href="./zjs/plug/layui-v2.3.0/layui/css/layui.css">
     <link rel="stylesheet" type="text/css" href="./zjs/plug/swagger/swagger-ui.css">
-    <link rel="stylesheet" type="text/css" href="./zcss/main.css">
     <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32"/>
     <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16"/>
 </head>
-    <body>
-        <!-- 此处放状态消息 -->
-        <div class="apidoc-message" style="margin: auto;background: lightseagreen;color:white;"></div>
-        <!-- 此处放主数据-->
-        <div id="apidoc-ui"></div>
-        <script src="./zjs/plug/swagger/swagger-ui-bundle.js"></script>
-        <script src="./zjs/plug/swagger/swagger-ui-standalone-preset.js"></script>
-        <script src="./zjs/plug/jquery.js"></script>
-        <script src="./zjs/plug/jquery.md5.js"></script>
-        <script src="./zjs//plug/layer-v3.1.1/layer/layer.js"></script>
-        <!-- 核心js文件 -->
-        <script src="./zjs/DistHelper.js"></script>
-        <script src="./zjs/main.js"></script>
-    </body>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo"><img  src="./favicon-16x16.png" class="layui-nav-img"/>apidoc接口文档</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="javascript:;">待定</a></li>
+            <li class="layui-nav-item"><a href="javascript:;">待定</a></li>
+            <li class="layui-nav-item"><a href="javascript:;">待定</a></li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="./favicon-16x16.png" class="layui-nav-img">
+                    待定
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:;">待定</a></dd>
+                    <dd><a href="javascript:;">待定</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="javascript:;">待定</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" >
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" id="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">内容主体区域</div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        <button class="layui-btn btn-load" >
+            <i class="layui-icon">&#xe9aa;</i> 强制刷新
+        </button>
+    </div>
+</div>
+<script src="./zjs/plug/layui-v2.3.0/layui/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['element','layer'], function(){
+        var element = layui.element;
+        var layer= layui.layer;
+
+    });
+
+</script>
+<script src="./zjs/plug/swagger/swagger-ui-bundle.js"></script>
+<script src="./zjs/plug/swagger/swagger-ui-standalone-preset.js"></script>
+<script src="./zjs/plug/jquery.js"></script>
+<script src="./zjs/plug/jquery.md5.js"></script>
+<!-- 核心js文件 -->
+<script src="./zjs/DistHelper.js"></script>
+<script src="./zjs/main.js"></script>
+</body>
 </html>

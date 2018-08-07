@@ -20,22 +20,23 @@ $(function () {
         //让对应的链接选中
         $('.urls-list a').removeClass('active');
         $('.urls-list a').each(function () {
-            var modules_names=[];
+            var modules_names = [];
             $(this).find('.module_names >.module-item').each(function () {
-                    modules_names.push($(this).text().trim());
+                modules_names.push($(this).text().trim());
             });
-            var modules_names2=[];
+            var modules_names2 = [];
             $('.module-list a.active').each(function () {
                 modules_names2.push($(this).find('.module_name:eq(0)').text())
             })
 
-            //求选中的模块和链接中模块的交集
-            var array_int=parent.ApiHelper.array_intersect(modules_names,modules_names2);
-            if(array_int &&array_int.length==modules_names.length&&modules_names.length==modules_names2.length){
+            //求选中的模块和链接中模块的交集(如果交集与数组长度一致,说明找到了对应的链接)
+            var array_int = parent.ApiHelper.array_intersect(modules_names, modules_names2);
+            if (array_int && array_int.length == modules_names.length && modules_names.length == modules_names2.length) {
 
                 $(this).trigger('click');
-                console.log($(this).index()+'|'+$(this).height() )
-                $(this).parent().scrollTop($(this).index()*$(this).height())
+                //选中 并让滚动条移动到该位置
+                console.log($(this).index() + '|' + $(this).height())
+                $(this).parent().scrollTop($(this).index() * $(this).height())
             }
         });
 
@@ -158,8 +159,8 @@ function bulid_url() {
                     a_html += '<span class="glyphicon glyphicon-trash"style="color:red;"></span>';
                     a_html += '</span> ';
                     a_html += '<span class="module_names">';
-                    for(var j in m){
-                        a_html+='<span class="module-item label label-primary">'+m[j]+'</span> '
+                    for (var j in m) {
+                        a_html += '<span class="module-item label label-primary">' + m[j] + '</span> '
                     }
                     a_html += '</span>'
                     a_html += '</a>';
