@@ -1,7 +1,7 @@
 //******* 核心帮助对象(模块化) ********
 var DistHelper = {
-
-    closeOpenTime:null,
+    //定时任务（接口加载后的操作）
+    closeOpenTime: null,
     //展示地址
     dist_url: "",
     //模块地址(json)
@@ -34,13 +34,16 @@ var DistHelper = {
         this.covert_url = this.http_protocol + '//' + host + '/' + [urls[0], "covert"].join("/");
         //绑定模块点击事件
         this.module_bind_click();
-        //标签点击事件
+        //左侧菜单标签点击事件
         $('body').delegate('dd', 'click', function (event) {
             //防止标签点击冒泡事件
             event.stopPropagation();
+            //左侧菜单标签选中效果
             $(this).find('>a').css('color', '#6ac1ff');
             $(this).siblings().find('>a').css('color', 'rgba(255,255,255,.7)');//siblings().css('color',;
-            var tag = $('#' + $(this).find('a').attr('data-tag'));
+            //标签对象：此方式防止id中带特殊符号
+            var tag = $("h4[id='" + $(this).find('a').attr('data-tag') + "']");// var tag = $('#' + $(this).find('a').attr('data-tag'));
+            //显示对应标签接口列表
             tag.parent().show();
             tag.parent().siblings().hide();
             if (!tag.parent().hasClass('is-open')) {
@@ -48,8 +51,13 @@ var DistHelper = {
             }
         });
         //强制刷新
-        $('.btn-load').on('click',function () {
+        $('.btn-load').on('click', function () {
             top.window.location.reload(true);
+        });
+        //进入文档生成页面
+        $('.go_covert').on('click', function () {
+
+            top.window.open(self.covert_url);
         });
         return this;
     },
@@ -70,7 +78,7 @@ var DistHelper = {
             },
             success: function (jsonData) {
                 if (!jsonData) {
-                    this.show_error('未发现对应的模块数据:(' + xr.status + ')' + '<a href="#" onclick="window.location.reload(true)">强制刷新</a>')
+                    this.show_error('未发现对应的模块数据:(' + xr.status + ')' + '<a href="#" class="btn-load">强制刷新</a>')
                 }
                 //拼接模板 并展示
                 var html = "";
@@ -81,7 +89,7 @@ var DistHelper = {
                 $('li.module-div:eq(0)').trigger('click');
             },
             error: function (xr) {
-                self.show_error('未发现对应的模块数据:(' + xr.status + ')' + '<a href="#" onclick="window.location.reload(true)">强制刷新</a>')
+                self.show_error('未发现对应的模块数据:(' + xr.status + ')' + '<a href="#" class="btn-load">强制刷新</a>')
             }
         });
 
@@ -89,16 +97,24 @@ var DistHelper = {
     },
 
     load_api_json: function (url) {
+        var self=this;
         $.ajax({
             url: url,
             type: 'get',
             dataType: "json",
             beforeSend: function (xmlHttp) {
+                layer.closeAll();
                 xmlHttp.setRequestHeader("If-Modified-Since", "0");
                 xmlHttp.setRequestHeader("Cache-Control", "no-cache");
             },
             success: function (jsonData) {
+                console.log('预加载json成功');
+            },
+            error:function (xhr) {
+                self.show_error('指定模块不存在');
+                clearInterval(self.closeOpenTime);
             }
+
         })
 
         return this;
@@ -122,7 +138,6 @@ var DistHelper = {
      */
     module_bind_click: function () {
 
-
         var self = this;
         //模块列表点击事件
         $("body").delegate("li.module-div", 'click', function () {
@@ -137,9 +152,9 @@ var DistHelper = {
                 $(moduleObj).removeClass('layui-this').addClass('layui-nav-itemed');
                 $('li.module-div').not(moduleObj).removeClass('layui-nav-itemed');
             }
-
+            //选中效果
             $(this).find('>a:eq(0)').css('color', '#6ac1ff');
-            $(this).siblings().find('>a').css('color', 'rgba(255,255,255,.7)');//siblings().css('color',;
+            $(this).siblings().find('>a').css('color', 'rgba(255,255,255,.7)');
             var json_name = $(this).attr('data-json-name');
             $('#module_name').html($(this).text());
             //拼接json地址
@@ -165,20 +180,20 @@ var DistHelper = {
 
             //隐藏地址
             $('#layui-body .topbar:eq(0)').hide();
-            //闭合标签
 
-           // if(self.closeOpenTime ){
-                clearInterval(self.closeOpenTime);
-            //}
+            //设置定时器（文档加载后的操作）
+            clearInterval(self.closeOpenTime);
             self.closeOpenTime = setInterval(function () {
                 console.log('hello');
-
                 //隐藏信息
                 $('#layui-body .information-container').hide();
+                var description=$('#layui-body .information-container .description').text();
                 $('#layui-body .scheme-container').attr('style', 'position:fixed;width:100%');
+                $('#layui-body .scheme-container').append('<section class="schemes wrapper block col-6">'+description+'</section>');
                 if ($('.opblock-tag-section').length > 0) {
                     clearInterval(self.closeOpenTime);
                     $('.opblock-tag-section').parent().css('paddingTop', '100px');
+                    //闭合标签
                     $('.opblock-tag-section').each(function () {
                         if ($(this).hasClass('is-open')) {
                             $(this).find('>h4:eq(0)').trigger('click');
@@ -194,14 +209,12 @@ var DistHelper = {
                     html += '  </dl>';
                     $(moduleObj).find('dl').remove();
                     $(moduleObj).append(html);
-                    if($(moduleObj).hasClass('layui-nav-itemed')){
+                    if ($(moduleObj).hasClass('layui-nav-itemed')) {
                         $(moduleObj).find('dd:eq(0)').trigger('click');
                     }
-                    $('#layui-body').show().addClass('layui-anim layui-anim-fadein');
-
+                    $('#layui-body').slideDown();
                 }
-
-            }, 300)
+            }, 200)
         });
         return this;
     },

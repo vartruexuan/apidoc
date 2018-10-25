@@ -1,5 +1,6 @@
 <?php
 /**
+ * 模块链接生成
  * Created by PhpStorm.
  * User: 小昭昭
  * Date: 2018/7/10

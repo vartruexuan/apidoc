@@ -89,6 +89,7 @@ class ApiDocument
     private static $obj = null;
 
     #################### 初始化操作 ##########################
+
     /**
      * 初始化数据 (常量)
      */
@@ -104,7 +105,7 @@ class ApiDocument
         define("API_COVERT_IMG", implode("/", array(API_COVERT, "img")));//img目录地址
         define("API_COVERT_JS", implode("/", array(API_COVERT, "js")));//js目录地址
         define("API_COVERT_CSS", implode("/", array(API_COVERT, "css")));//css目录地址
-        define("API_DIST_JSON",implode("/",array(API_DIST,'json')));//dist/json
+        define("API_DIST_JSON", implode("/", array(API_DIST, 'json')));//dist/json
         ### 默认设置 ###
         ini_set('max_execution_time', '0');//不限制页面执行时间
         date_default_timezone_set("Asia/Shanghai");//设置时区
@@ -115,11 +116,13 @@ class ApiDocument
 
         $this->json = array_merge($this->json, $params['server_info']);//合并json配置
         $this->config = array_merge($this->config, $params['config']);//合并公共配置
+        # 定界符
+        $this->delimiter=(isset($this->config['delimiter'])&&$this->config['delimiter'])?$this->config['delimiter']:'APIDOC';
         ### 添加公共提示信息 ###
 
         $this->addPublicMessage("注释中请定义指定定界符:" . $this->delimiter . ',否则将不会被解析');
         ### 创建初始化需要的目录###
-        $dir = $this->mk_json_dir();//创建json根目录
+        //$dir = $this->mk_json_dir();//创建json根目录
 
         ### 开启session ###
         session_start();
@@ -158,6 +161,7 @@ class ApiDocument
     }
 
     ###################  配置操作  #####################
+
     /**
      * 添加公共参数
      * @param array $param ['name'=>'参数名','in'=>'参数位置','default'=>"默认值","description"=>"描述","required"=> 是否必传（true/false）,"not_add_url=>array('不需要该参数的url')"]
@@ -310,7 +314,7 @@ class ApiDocument
         if (is_array($info) && array_key_exists('extension', $info) && $info['extension'] == 'php') {
             $contents = file_get_contents($path);
             $matchs = [];
-            preg_match_all('@/\*\*' . $this->delimiter . '.*?\*/@s', $contents, $matchs);
+            preg_match_all('@/\*\*' . preg_quote($this->delimiter) . '.*?\*/@s', $contents, $matchs);
             foreach ($matchs[0] as $com) {
                 $comment = $com;
                 #格式化注释 到json数组中
@@ -329,7 +333,10 @@ class ApiDocument
     private function putFile($file_name, $data)
     {
         try {
-            file_put_contents($file_name, json_encode($data, 2));
+            if(!@file_put_contents($file_name, json_encode($data, 2))){
+                $error=error_get_last();
+                throw new ApiDocumentException($error['message']);
+            }
         } catch (\Exception $e) {
             throw new ApiDocumentException('写入json文件失败:' . $e->getMessage());
         }
@@ -498,7 +505,7 @@ class ApiDocument
         $data = $this->returnSuccess();
         try {
             # 先删除之前生成的json文件
-            $this->delFile(WEB_ROOT.API_DIST_JSON);
+            $this->delFile(WEB_ROOT . API_DIST_JSON);
             # 获取模块列表
             $module = $this->config['module'];
 
@@ -521,7 +528,7 @@ class ApiDocument
                 if (is_array($m['path'])) {
                     $path = $m['path'];
                 } else {
-                    $path=array();
+                    $path = array();
                     $path[] = $m['path'];
                 }
                 foreach ($path as $p) {
@@ -532,15 +539,15 @@ class ApiDocument
                     }
                     # 如果是目录
                     if (is_dir($p)) {
-                        $this->dir_format_json($p,-1, $m);
-                    # 如果是文件
+                        $this->dir_format_json($p, -1, $m);
+                        # 如果是文件
                     } else {
                         $this->file_format_json($p);
                     }
 
                 }
                 # 3.将json_cache 写入文件 (如果无错)
-                $to_dir="../dist/json/".md5($m['title']).'.json';
+                $to_dir = "../dist/json/" . md5($m['title']) . '.json';
                 if ($to_dir && $this->moduleMessage[$m['title']]['status'] == 0) {
                     $this->putFile($to_dir, $this->json_cache);
                 }
@@ -566,7 +573,8 @@ class ApiDocument
     }
 
     # 所有模块的json文件名(只在生成的是生成一次,用来在比较使用)
-    private   $module_all_name="module_all";
+    private $module_all_name = "module_all";
+
     /**
      * 生成模块json文件 并返回dist地址
      * @param $modules 模块列表([[title=>'模块1'],['title'=>'模块2']])
@@ -602,15 +610,15 @@ class ApiDocument
      */
     public function getAllModule()
     {
-        $modules=[];
+        $modules = [];
         # 文件是否存在
-        $path=WEB_ROOT.API_DIST.'/json/module/'.$this->module_all_name.'.json';
-        if(file_exists($path)){
-            $json=file_get_contents($path);
-            $modules=json_decode($json,1);
+        $path = WEB_ROOT . API_DIST . '/json/module/' . $this->module_all_name . '.json';
+        if (file_exists($path)) {
+            $json = file_get_contents($path);
+            $modules = json_decode($json, 1);
         }
         # 读取数据
-        return $modules?$modules:[];
+        return $modules ? $modules : [];
     }
 
     /**
@@ -620,45 +628,46 @@ class ApiDocument
     public function getAllModuleUrls()
     {
         # 打开目录 获取文件列表
-        $urls=[];
-        $dir=WEB_ROOT.API_DIST.'/json/module';
-        if(file_exists($dir)){
-            $dirObj=opendir($dir);
-            while ($file=readdir($dirObj)){
-                $fullpath=$dir.'/'.$file;
-                $info=pathinfo($fullpath);
-                $ext=$info['extension'];
-                $filename=$info['filename'];
+        $urls = [];
+        $dir = WEB_ROOT . API_DIST . '/json/module';
+        if (file_exists($dir)) {
+            $dirObj = opendir($dir);
+            while ($file = readdir($dirObj)) {
+                $fullpath = $dir . '/' . $file;
+                $info = pathinfo($fullpath);
+                $ext = $info['extension'];
+                $filename = $info['filename'];
                 # 筛选指定文件
-                if(!is_file($fullpath)||$ext!='json'||$filename==$this->module_all_name) {
+                if (!is_file($fullpath) || $ext != 'json' || $filename == $this->module_all_name) {
                     continue;
                 }
                 # 获取对应的模块列表
-                $modules=file_get_contents($fullpath);
-                $modules=json_decode($modules,true);
-                $modules=$modules?$modules:[];
-                $urls[$filename]=$modules;
+                $modules = file_get_contents($fullpath);
+                $modules = json_decode($modules, true);
+                $modules = $modules ? $modules : [];
+                $urls[$filename] = $modules;
             }
         }
-        return $urls?$urls:[];
+        return $urls ? $urls : [];
     }
 
     /**
      * 删除指定链接
      * @param $num 链接文件名 /dist/json/module/xxxx.json
      */
-    public  function del_module_url($num)
+    public function del_module_url($num)
     {
-        $path=WEB_ROOT.API_DIST.'/json/module/'.$num.'.json';
-        if($num==$this->module_all_name||!file_exists($path)){
+        $path = WEB_ROOT . API_DIST . '/json/module/' . $num . '.json';
+        if ($num == $this->module_all_name || !file_exists($path)) {
             return $this->returnError('文件不存在');
         }
-        if( !@unlink($path)){
+        if (!@unlink($path)) {
             return $this->returnError('删除文件失败');
         }
         return $this->returnSuccess();
     }
- ################### 工具信息操作  ########################
+    ################### 工具信息操作  ########################
+
     /**
      * 获取工具信息(版本..)
      * @return array
@@ -684,53 +693,72 @@ class ApiDocument
 #################### 页面操作 ####################################
 
     # 显示生成页面
-    public function showCovertPage(){
-        $this->showPage("covert");
+    public function showCovertPage($is_auth = true)
+    {
+        $this->showPage("covert", null, [], $is_auth);
     }
-    # 显示权限验证页面
-    public function showAuthPage(){
-        $this->showPage('auth');
-    }
-    # 显示生成链接页面
-    public function showBulidPage(){
 
-        $ref=array_key_exists('HTTP_REFERER',$_SERVER)?$_SERVER['HTTP_REFERER']:'';
-        $upath=  substr($ref,strpos($ref,'/',8));
-        if($ref && in_array($upath,[API_COVERT,API_COVERT.'/'])){
+    # 显示权限验证页面
+    public function showAuthPage($is_auth = false)
+    {
+        $this->showPage('auth', null, [], $is_auth);
+    }
+
+    # 显示生成链接页面
+    public function showBulidPage($is_auth = true)
+    {
+        //验证什么方式打开(非窗口跳生成页面)
+        $ref = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : '';
+        $upath = substr($ref, strpos($ref, '/', 8));
+        if ($ref && in_array($upath, [API_COVERT, API_COVERT . '/'])) {
             //查询模块列表
-            $modules=$this->getAllModule();
+            $modules = $this->getAllModule();
             //已有链接列表
-            $urls=$this->getAllModuleUrls();
-            $params['modules']=$modules;
-            $params['urls']=$urls;
-            $this->showPage('bulid_url','php',$params);
-        }else{
+            $urls = $this->getAllModuleUrls();
+            $params['modules'] = $modules;
+            $params['urls'] = $urls;
+            $this->showPage('bulid_url', 'php', $params, $is_auth);
+        } else {
             $this->redirectPage();
         }
 
     }
-    # 跳转指定页面
-    public function redirectPage($url=null){
-        $url=$url?$url:API_COVERT;
-        header('Location:'.$url);
+    # 显示设置页面
+    public function showSetConfig($is_auth = true)
+    {
+        $this->showPage('set_config', null, [], $is_auth);
     }
+
+    # 跳转指定页面
+    public function redirectPage($url = null)
+    {
+        $url = $url ? $url : API_COVERT;
+        header('Location:' . $url);
+    }
+
     /**
      * 显示指定页面
      * @param string $name 模板名
      * @param array $params 需要导入到页面的参数 ['参数名'=>参数值]
      */
-    public function showPage($name = "covert", $ext = "php",$params=array())
+    public function showPage($name = "covert", $ext = "php", $params = array(), $is_auth = true)
     {
+        $ext = $ext ? $ext : 'php';
+        if ($is_auth && !$this->checkAuth()) {
+            $this->showAuthPage();
+            return;
+        }
+
         header('Content_Type:text/html;charset=utf8');
         # 导入参数
-        foreach($params as $k=>$v){
-            $$k=$v;
+        foreach ($params as $k => $v) {
+            $$k = $v;
         }
         # 工具信息
-        $info=$this->getApiDocmentInfo();
+        $info = $this->getApiDocmentInfo();
 
         # 公共消息
-        $public_msg=$this->config['public_message'];
+        $public_msg = $this->config['public_message'];
         include("./template/" . $name . "." . $ext);
     }
 ################  权限操作 start #####################
@@ -742,28 +770,18 @@ class ApiDocument
     public function checkAuth()
     {
         # 未设置密码 直接通过
-       if(!array_key_exists('covert_password',$this->config)||!$this->config['covert_password']){
-           return true;
-       }
-
-       # 设置密码了--不存在$_SESSION['apidoc_auth']
-       /*if(!array_key_exists('apidoc_auth',$_SESSION)){
-           return false;
-       }
-
-       # 设置密码了---验证密码
-       if(md5($this->config['covert_password'])==$_SESSION['apidoc_auth']){
-           return true;
-       }
-       unset($_SESSION['apidoc_auth']);*/
-        $apidoc_auth=Session::get('apidoc_auth');
-        if(!$apidoc_auth){
-            return false;
-        }
-        if(md5($this->config['covert_password'])==$apidoc_auth){
+        if (!array_key_exists('covert_password', $this->config) || !$this->config['covert_password']) {
             return true;
         }
-       return false;
+
+        $apidoc_auth = Session::get('apidoc_auth');
+        if (!$apidoc_auth) {
+            return false;
+        }
+        if (md5($this->config['covert_password']) == $apidoc_auth) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -772,27 +790,31 @@ class ApiDocument
      */
     public function checkPwd($pwd)
     {
-        $pwd=md5($pwd);
+        $pwd = md5($pwd);
         # 未设置密码 直接通过
-        if(!array_key_exists('covert_password',$this->config)||!$this->config['covert_password']){
+        if (!array_key_exists('covert_password', $this->config) || !$this->config['covert_password']) {
             return true;
         }
         # 配置中存在密码
-        if(md5($this->config['covert_password'])==$pwd){
+        if (md5($this->config['covert_password']) == $pwd) {
             # 添加session
-           // $_SESSION['apidoc_auth']=$pwd;
-            Session::set('apidoc_auth',$pwd,3600*4);
+            // $_SESSION['apidoc_auth']=$pwd;
+            Session::set('apidoc_auth', $pwd, 3600 * 4);
             return true;
         }
         return false;
     }
- ##################### 返回信息(格式) #######################
-    public function returnError($message='',$code=500,$data=array()){
-        $data=array('status'=>$code,'message'=>$message,'data'=>$data);
+
+    ##################### 返回信息(格式) #######################
+    public function returnError($message = '', $code = 500, $data = array())
+    {
+        $data = array('status' => $code, 'message' => $message, 'data' => $data);
         return $data;
     }
-    public function returnSuccess($data=array(),$message=''){
-        $data=array('status'=>0,'message'=>$message,'data'=>$data);
+
+    public function returnSuccess($data = array(), $message = '')
+    {
+        $data = array('status' => 0, 'message' => $message, 'data' => $data);
         return $data;
     }
 ##################### 文件操作 #########################
@@ -802,18 +824,137 @@ class ApiDocument
      * @param $dirName 目录地址
      * @return bool
      */
-    public function delFile($dirName,$is_depath=false){
-        if(file_exists($dirName) && $handle=opendir($dirName)){
-            while(false!==($item = readdir($handle))){
-                if($item!= "." && $item != ".."){
-                    if(file_exists($dirName.'/'.$item) && is_dir($dirName.'/'.$item)&&$is_depath){
-                        $this->delFile($dirName.'/'.$item,$is_depath);
-                    }else{
-                       @unlink($dirName.'/'.$item);
+    public function delFile($dirName, $is_depath = false)
+    {
+        if (file_exists($dirName) && $handle = opendir($dirName)) {
+            while (false !== ($item = readdir($handle))) {
+                if ($item != "." && $item != "..") {
+                    if (file_exists($dirName . '/' . $item) && is_dir($dirName . '/' . $item) && $is_depath) {
+                        $this->delFile($dirName . '/' . $item, $is_depath);
+                    } else {
+                        @unlink($dirName . '/' . $item);
                     }
                 }
             }
-            closedir( $handle);
+            closedir($handle);
         }
+    }
+
+###################### 配置操作  #############################
+
+    /**
+     * 获取所有配置数据
+     * @return mixed
+     */
+    public function getAllConfig()
+    {
+        return require(__DIR__ . '/../config/Config.php');
+    }
+
+    /**
+     * 获取主配置数据
+     * @return mixed
+     */
+    public function getServerInfoConfig()
+    {
+        $config = $this->getAllConfig();
+        return $config['server_info'];
+    }
+
+    /**
+     * 获取模块配置数据
+     * @return mixed
+     */
+    public function  getConfig()
+    {
+        $config = $this->getAllConfig();
+        return $config['config'];
+    }
+
+    /**
+     * 获取主配置中对应键的值
+     * @param $name
+     * @return mixed
+     */
+    public  function getServerInfoValue($name)
+    {
+        $server_info=$this->getServerInfoConfig();
+        return $server_info[$name];
+
+    }
+
+    /**
+     * 设置主配置
+     * @param $name
+     * @param $value
+     */
+    public  function setServerInfoValue($name,$value)
+    {
+       $config= $this->getAllConfig();
+       $config['server_info'][$name]=$value;
+       # 写入配置
+       return $this->writeConfig($config);
+    }
+
+    /**
+     * 获取模块配置
+     * @param $name
+     * @return mixed
+     */
+    public function  getConfigValue($name)
+    {
+        $config=$this->getConfig();
+        return $config[$name];
+
+    }
+
+    /**
+     * 设置模块配置
+     * @param $name
+     * @param $value
+     */
+    public function  setConfigValue($name,$value)
+    {
+        $config= $this->getAllConfig();
+        $config['config'][$name]=$value;
+        # 写入配置
+        return $this->writeConfig($config);
+    }
+
+    /**
+     * 写入配置
+     */
+    public function writeConfig($config=array())
+    {
+
+        $config_path=__DIR__.'/../config/Config.php';
+        $content = "<?php\n";
+        $content .= 'return ';
+        $content .= var_export($config, true);
+        $content .= ";\n";
+        # 创建并打开配置文件
+        touch ($config_path);
+        $filePointer = fopen($config_path, 'r+');
+
+        # 设置文件权限
+        chmod($config_path, 0640);
+
+        # 文件不存在
+        if(!is_resource ($filePointer)) {
+           return false;
+        }
+
+        # 尝试枷锁
+        if(!flock($filePointer, LOCK_EX)) {
+            return false;
+        }
+
+        # 编写配置并释放锁
+        ftruncate ($filePointer, 0);
+        fwrite($filePointer, $content);
+        fflush($filePointer);
+        flock($filePointer, LOCK_UN);
+        fclose($filePointer);
+        return true;
     }
 }

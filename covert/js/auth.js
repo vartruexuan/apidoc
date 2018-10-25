@@ -38,11 +38,10 @@ $(function () {
  */
 function checkpwd(pwd) {
     $.ajax({
-        url:"",
+        url:window.post_auth,
         type:'post',
         dataType:"json",
         data:{
-            type:2,
             pwd:pwd
         },
         success:function (jsonData) {

@@ -102,7 +102,7 @@ $(function () {
 function del_url(num) {
 
     parent.ApiHelper.ajax({
-        url: "",
+        url: parent.post_del_url,
         type: "post",
         dataType: "json",
         data: {
@@ -139,7 +139,7 @@ function bulid_url() {
     });
     modules = m.join(',');
     parent.ApiHelper.ajax({
-        url: "",
+        url: parent.post_bulid_url,
         type: 'POST',
         dataType: 'json',
         data: {

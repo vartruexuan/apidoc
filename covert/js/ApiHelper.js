@@ -1,10 +1,45 @@
 //*********ApiHelper.js 核心操作对象************
 var ApiHelper = {
-    module_name:"",//生成后的第一个链接名
-    module_url:"",//生成后的第一个文档链接
+    module_name: "",//生成后的第一个链接名
+    module_url: "",//生成后的第一个文档链接
     //初始化
     init: function () {
-        self = this;
+        var self = this;
+        //初始化layer
+        layui.use(['element', 'layer', 'code', 'util'], function () {
+            var element = layui.element;
+            var layer = layui.layer;
+            var util = layui.util;
+            //展示右下底部按钮
+            util.fixbar({
+                bar1: true,
+                bar2: true,
+                click: function (type) {
+                    //console.log(type);
+                    if (type === 'bar1') {
+                        alert('点击了bar1')
+                    }else if(type === 'bar2'){
+                        alert('点击了bar2')
+                    }else if(type === 'top'){
+                       // alert('点击了top')
+                    }
+                }
+            });
+            //始化绑定事件
+            self.bind_event();
+        });
+        return this;
+    },
+    /**
+     * 初始化绑定事件
+     * @returns {ApiHelper}
+     */
+    bind_event: function () {
+        var self = this;
+        // 配置事件
+        $('.btn-setConfig').on('click', function () {
+            self.set_config();
+        });
         // 模块列表添加点击事件和样式
         $('.tab-container').delegate('>div>a', 'click', function () {
             $('.tab-container>div>a').css('backgroundColor', '')
@@ -12,12 +47,14 @@ var ApiHelper = {
             $('.tab-container .tab-content').addClass('hide');
             $(this).parent().find('.tab-content').removeClass('hide');
         });
+        //绑定生成指定模块
+        $('#modules_url').on('click', function () {
+            self.build_url();
+        });
         //刷新
         $('#doc_refresh').on('click', function () {
             self.covert();
         });
-        //绑定生成指定模块
-        this.bind_build_url();
         return this;
     },
     /**
@@ -27,7 +64,7 @@ var ApiHelper = {
      */
     set_covert_status: function (jsonData) {
         if (jsonData.status == 0 && jsonData.data.url) {//成功
-            $('.message').html('<a href="' + jsonData.data.url + '" class="go_to_dist" target="_blank"><span class="glyphicon glyphicon-hand-right"> 访问接口文档</span></a>');
+            $('.message').html('<a href="' + jsonData.data.url + '" class="go_to_dist" target="_blank"><span><i class="layui-icon">&#xe602;</i> 访问接口文档</span></a>');
             this.blink('.go_to_dist');
         } else {  //失败
             $('.message').html('<span style="color:red">' + jsonData.message + "</span>");
@@ -53,9 +90,9 @@ var ApiHelper = {
             }
         }
         var html = "";
-        html += "<span>总数量: <span class=' badge' style='background-color:wheat;color: green;font-size: 18px;'>" + total_count + "</span></span> ";
-        html += "<span>成功: <span class='badge'   style='background-color:wheat;color: green;font-size: 18px;'>" + success_count + "</span></span> ";
-        html += "<span>失败: <span class='module_error badge'   style='background-color:wheat;color: red;font-size: 18px;'>" + error_count + "</span></span> ";
+        html += "<span>总数量: <span class='layui-badge layui-bg-green'>" + total_count + "</span></span> ";
+        html += "<span>成功: <span class='layui-badge layui-bg-green'>" + success_count + "</span></span> ";
+        html += "<span>失败: <span class='module_error layui-badge'>" + error_count + "</span></span> ";
         $('.covert-status').html(html);
         //错误数量大于0 闪烁提醒
         if (error_count > 0) {
@@ -70,32 +107,34 @@ var ApiHelper = {
      */
     append_module: function (modules) {
         this.set_module_status(modules);
+
         var id_index = 0;
         for (var i in modules) {
-            id_index += 1
+            id_index += 1;
             var id = "c" + id_index;
 
             //添加返回信息
             var dd_con = '<div style="padding:10px;">';
             if (modules[i]['status'] == 0) {
-                dd_con += "<pre><p class='title_ok'>(" + i + ")生成成功" + "</p></pre>"
+                dd_con += "<div><pre><p  class='layui-code layui-box layui-code-view' style='color: green;'>(" + i + ") 生成成功" + "</p></pre></div>"
                 //模块生成失败
             } else {
-                dd_con += "<pre><p class='title_error'>" + modules[i]['status_message'] + "</p></pre>"
-                dd_con += "<pre><p><span class='key'>" + "文件地址:</span><br><span class='value ' >" + modules[i]['file_name'] + "</span></p></pre>";
-                dd_con += "<pre><p><span class='key'>" + "注释:</span><br><span class='value comment' >" + modules[i]['com'] + "</span></p></pre>";
+                dd_con += "<div><pre class='layui-code layui-box layui-code-view' style='color: red'> " + modules[i]['status_message'] + "</pre></div>"
+                dd_con += "<div><pre class='layui-code layui-box layui-code-view'> " + "文件地址: <span class='value ' >" + modules[i]['file_name'] + "</span></p></pre></div>";
+
+                dd_con += "<div><pre class='layui-code layui-box layui-code-view' lay-title='php'> <h3 class='layui-code-h3'>" + "注释</h3><br><ol class='layui-code-ol' style='color: green' ><li>" + modules[i]['com'] + "</li></ol></pre></div>";
             }
             dd_con += "</div>"
             //添加tabs 标题
             var html_title = "";
             var html_content = "";
-            html_title += '<li role="presentation" class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span class="' + (modules[i]['status'] == 0 ? 'glyphicon glyphicon-ok' : 'glyphicon glyphicon-remove') + '" style="color:' + (modules[i]['status'] == 0 ? 'green' : 'red') + ';"> ' + i + '</span></a></li>';
-            html_content += '<div role="tabpanel" class="tab-pane " id="' + id + '">' + dd_con + '</div>';
+            html_title += '<li  class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span style="color: ' + (modules[i]['status'] == 0 ? "green" : "red") + ';"><i class="layui-icon">' + (modules[i]['status'] == 0 ? '&#xe605;' : '&#x1006;') + '</i> ' + i + '</span></a></li>';
+            html_content += '<div  class="layui-tab-item " id="' + id + '">' + dd_con + '</div>';
 
-            $('.tab-container .nav-tabs').append(html_title);
-            $('.tab-container .tab-content').append(html_content);
+            $('.covert_module .layui-tab-title').append(html_title);
+            $('.covert_module .layui-tab-content').append(html_content);
         }
-        $('.tab-container .nav-tabs li a:eq(0)').trigger('click');
+        $('.covert_module .layui-tab-title li a:eq(0)').trigger('click');
         return this;
     },
     /**
@@ -103,9 +142,9 @@ var ApiHelper = {
      * @param info
      */
     show_info: function (info) {
-        $('.footer').html('');
-        $('.footer').append('版本: <a>' + info['version'] + "</a>");
-        $('.footer').append('生成时间: <a>' + info['date'] + "</a>");
+        $('.apidoc-info').html('');
+        $('.apidoc-info').append('<label class="layui-label layui-word-aux">版本:</label> <a>' + info['version'] + "</a> ");
+        $('.apidoc-info').append('<label class="layui-label layui-word-aux">生成时间:</label> <a>' + info['date'] + "</a>");
     },
 
     /**
@@ -120,13 +159,16 @@ var ApiHelper = {
             type: "post",
             dataType: "json",
             beforeSend: function () {
-                $('.tab-container .nav-tabs').html('');
-                $('.tab-container .tab-content').html('');
+                /**
+                 *  清空数据
+                 */
+                $('.covert_module .layui-tab-title').html('');
+                $('.covert_module .layui-tab-content').html('');
                 $('.modules_status').html('<a style="font-size: 20px;"><img mou height="30px" src="' + page_covert_img + '/load.gif"/> 正在生成文档中.....</a>');
             },
             success: function (jsonData) {
                 self.module_url = jsonData.data.url;
-                self.module_name= (self.module_url.split('num='))[1];
+                self.module_name = (self.module_url.split('num='))[1];
                 //展示生成文档状态
                 self.set_covert_status(jsonData);
                 //将数据嵌入到页面中
@@ -144,38 +186,34 @@ var ApiHelper = {
     /**
      * 绑定生成链接事件
      */
-    bind_build_url: function () {
-        $('#modules_url').on('click', function () {
-            layer.open({
-                type: 2,
-                title: '指定模块生成链接',
-                shadeClose: true,
-                shade: [0.5],
-                offset:'ct',
-               // maxmin: true, //开启最大化最小化按钮
-                area: ['900px', '500px'],
-                content: page_bulid_url,
-                //btn: ['生成'],
-                btn1: function (index, layero) {
+    build_url: function () {
+        layer.open({
+            type: 2,
+            title: '指定模块生成链接',
+            shadeClose: true,
+            shade: [0.5],
+            offset: 't',
+            // maxmin: true, //开启最大化最小化按钮
+            area: ['900px', '500px'],
+            content: page_bulid_url,
+        });
+    },
+    /**
+     * 配置
+     */
+    set_config: function () {
+        layer.open({
+            type: 2,
+            title: '配置',
+            shadeClose: true,
+            shade: [0.5],
+            id: 'layer-set-config',
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["1000px", "600px"],
+            content: page_set_config,
 
-                    // 获取选中的模块
-                    var div_m = $('.module-list a.active');
-                    if (div_m.length < 1) {
-                        layer.msg('请选择要生成链接的模块');
-                        return;
-                    }
-                    //拼接模块
-                    var m = [];
-                    div_m.each(function () {
-                        m.push($(this).text())
-                    });
-                    modules = m.join(',');
-
-                    console.log(div_m);
-                    alert(modules);return;
-                }
-            });
-        })
+        });
     },
     /**
      *  指定元素闪烁
@@ -188,6 +226,7 @@ var ApiHelper = {
                 self.blink(this);
             });
         });
+        return this;
     },
     /**
      * 发送ajax请求（为了过滤）
@@ -212,14 +251,14 @@ var ApiHelper = {
      * 拼接地址
      * @param path
      */
-    splicing_url:function(path){
+    splicing_url: function (path) {
         return window.location.protocol + "//" + window.location.host + path;
     },
     /**
      * 数组取交集
      * @returns {Array}
      */
-    array_intersect:function () {
+    array_intersect: function () {
         var result = new Array();
         var obj = {};
         for (var i = 0; i < arguments.length; i++) {
@@ -230,8 +269,7 @@ var ApiHelper = {
                 }
                 else {
                     obj[str]++;
-                    if (obj[str] == arguments.length)
-                    {
+                    if (obj[str] == arguments.length) {
                         result.push(str);
                     }
                 }//end else
