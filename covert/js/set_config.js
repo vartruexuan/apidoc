@@ -16,8 +16,6 @@ var config = {
                 self.initConfig();
                 //绑定事件
                 self.bind_event();
-
-
             })
 
             return this;
@@ -30,10 +28,23 @@ var config = {
             this.get_config(function (jsonData) {
                 //*****初始化配置数据****//
                 var host = jsonData.data.config.server_info.host;
+                var delimiter=jsonData.data.config.config.delimiter;
+                var schemes=jsonData.data.config.server_info.schemes;
                 var modules = jsonData.data.config.config.module;
-                console.log(modules);
                 //主域名
                 $('input[name=host]').val(host);
+                //定界符
+                $('input[name=delimiter]').val(delimiter);
+                console.log(schemes);
+                //接口协议
+                $('input[name=schemes]').each(function(){
+                    for(var i in schemes ){
+                        if(schemes[i].toLowerCase()==$(this).attr("title").toLowerCase()){
+                            $(this).prop("checked",true);
+                            return true;
+                        }
+                    }
+                });
                 //模块列表
                 for (var i in modules) {
                     self.add_module(modules[i]);
@@ -74,6 +85,11 @@ var config = {
             });
             //模块标签-删除
             self.del_label();
+            //模块名和tab同步
+            $('.tab-modules').delegate("input[name=title]",'change',function () {
+                $('.tab-modules .layui-tab-title li:eq('+$(this).parents('.layui-tab-item:eq(0)').index()+')').text($(this).val())
+
+            });
             return this;
         },
         /**
@@ -83,11 +99,10 @@ var config = {
 
             //初始配置
             parent.ApiHelper.ajax({
-                url:parent.post_get_config ,
+                url: parent.post_get_config,
                 type: 'post',
                 dataType: 'json',
-                data: {
-                },
+                data: {},
                 success: sunccess_fun
             })
             return this;
@@ -98,13 +113,27 @@ var config = {
          * 添加模块
          */
         add_module: function (module) {
-            var self=this;
-            var title = "新增模块";
+
+            var titles = [];
+            $("input[name=title]").each(function () {
+                titles.push($(this).val())
+            });
+            var self = this;
+            var title = "module";
+            //生成一个唯一的模块名
+            while (true) {
+                var random = Math.ceil(Math.random() * 100);
+                title1 = title + random;
+                if (titles.indexOf(title1) < 0) {
+                    title = title1;
+                    break;
+                }
+            }
             var version = "v1.0";
             var description = "";
             var template = "";
             //单模块html模板
-            template += '<blockquote class="">';
+            template += '<blockquote class="layui-form">';
             template += '    <div class="layui-row layui-col-space10">';
             template += '         <div class="layui-col-md3">';
             template += '             <fieldset class="layui-elem-field layui-field-title">';
@@ -148,19 +177,24 @@ var config = {
             var tags = [];
             if (module) {
                 title = module.title;
-                version=module.version;
-                description=module.description;
-                for (var i = 0; i < module.path.length; i++) {
-                    paths.push(self.add_path(null, module.path[i]));
+                version = module.version;
+                description = module.description;
+                if(module.path){
+                    for (var i = 0; i < module.path.length; i++) {
+                        paths.push(self.add_path(null, module.path[i]));
+                    }
                 }
-                for (var i = 0; i < module.tags.length; i++) {
-                    tags.push(self.add_label(null, module.tags[i].name, module.tags[i].description));
+                if(module.tags){
+                    for (var i = 0; i < module.tags.length; i++) {
+                        tags.push(self.add_label(null, module.tags[i].name, module.tags[i].description));
+                    }
                 }
+
             }
             template = template.replace('#title#', title);
             template = template.replace('#version#', version);
             template = template.replace('#description#', description);
-            template=template.replace('#path#',paths.join('')).replace("#tag#",tags.join(""));
+            template = template.replace('#path#', paths.join('')).replace("#tag#", tags.join(""));
             //添加模块
             var id = new Date().getTime();
             window.element.tabAdd('tab-modules', {
@@ -170,6 +204,7 @@ var config = {
             });
             //让该模块选中
             window.element.tabChange('tab-modules', id);
+            layui.form.render();
             return this;
         },
         /**
@@ -195,21 +230,46 @@ var config = {
         add_path: function (parent_obj, val) {
             val = val ? val : '';
             var btn = '<div class="layui-row">';
-            btn += '        <div class="layui-col-md10">';
-            btn += '            <input type="text" name="path" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="#value#">';
+
+            // <!-- 相对地址 -->
+            btn += '       <div class="layui-col-md2">';
+            btn += '                <select name="relative" lay-verify="">';
+            btn += '                     <option value="" #null# >绝对地址</option>';
+            btn += '                     <option value="{{web_root_top}}" #web_root_top# >根目录上一级</option>';
+            btn += '                     <option value="{{web_root_top2}}" #web_root_top2# >根目录上二级</option>';
+            btn += '                     <option value="{{web_root}}" #web_root# >根目录</option>';
+
+            btn += '                </select>';
             btn += '       </div>';
-            btn += '       <div class="layui-col-md1">';
-            btn += '             <button class="layui-btn layui-btn-fluid layui-btn-primary btn-select-path" type="button"><i class="layui-icon" title="选择路径">&#xe655;</i></button>';
+
+            btn += '       <div class="layui-col-md9">';
+            btn += '            <input type="text" name="path" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="#value#">';
             btn += '       </div>';
             btn += '       <div class="layui-col-md1">';
             btn += '            <button class="layui-btn layui-btn-fluid layui-btn-primary btn-del-path" type="button"><i class="layui-icon " style="color:red" title="删除">&#xe640;</i></button>';
             btn += '       </div>';
             btn += '   </div>';
 
+            //地址相对类型处理
+            if(val.indexOf("{{web_root_top2}}")>-1){
+                val=val.replace("{{web_root_top2}}","");
+                btn=btn.replace("#web_root_top2#","selected")
+            }else if(val.indexOf("{{web_root_top}}")>-1){
+                val=val.replace("{{web_root_top}}","");
+                btn=btn.replace("#web_root_top#","selected")
+            }else if(val.indexOf("{{web_root}}")>-1){
+                val=val.replace("{{web_root}}","");
+                btn=btn.replace("#web_root#","selected")
+            }else{
+                btn=btn.replace("#null#","selected")
+            }
+            btn=  btn.replace("#web_root_top2#","").replace("#web_root_top#","").replace("#web_root#","").replace("#null#","");
+            //地址
             btn = btn.replace('#value#', val);
             if (parent_obj) {
                 parent_obj.append($(btn));
             }
+            layui.form.render("select");
             return btn;
         },
         del_path: function () {
@@ -318,21 +378,89 @@ var config = {
          *  保存
          */
         save: function () {
+
+
+            //***  主配置 ***//
+            var server_info=$(".server_info");//主配置对象
+            var host=server_info.find("input[name=host]").val();//主机域名
+            var delimiter=server_info.find("input[name=delimiter]").val();//定界符
+            var schemes=[];//支持协议
+            server_info.find('input[name=schemes]:checked').each(function () {
+                schemes.push($(this).attr("title"));
+            });
+
+           //*** 模块配置 ***//
+            var modules=[];
+            $('#config_form').find('.layui-tab-item').each(function () {
+                if ($(this).index() > 0) {
+
+                    //标题
+                    var title = $(this).find("input[name=title]").val();
+                    //版本
+                    var version = $(this).find('input[name=version]').val();
+                    //描述
+                    var description = $(this).find('input[name=description]').val();
+                    //路径
+                    var paths = [];
+                    $(this).find('.module-path .layui-row').each(function () {
+                        //拼接类型 和相对地址
+                        var p = $(this).find('input[name=path]').val();
+                        var type = $(this).find('select[name=relative]').val();
+                        paths.push(type + p);
+                    })
+                    //标签
+                    var labels = [];
+                    $(this).find('.module-label .layui-row').each(function () {
+                        var name = $(this).find("input[name=name]").val();//标签名
+                        var description = $(this).find("input[name=description]").val();//标签描述
+                        labels.push({
+                            "name": name,
+                            "description": description,
+                        });
+                    });
+
+                    //加入模块列表
+                    modules.push({
+                        title:title,
+                        version:version,
+                        description:description,
+                        path:paths,
+                        tags:labels
+                    });
+                }
+            });
+            //****  拼接配置  ****//
+            var data={
+
+                // 主json配置
+                server_info:{
+                    //域名
+                    host:host,
+                    //传输协议
+                    schemes:schemes,
+                },
+                config:{
+                    //定界符
+                    delimiter:delimiter,
+                    module:modules,
+                }
+
+
+            };
+            console.log(JSON.stringify(data));
+            //**** 发送请求 ****//
+            //2.提交代码
             $.ajax({
                 url: parent.post_save_config,
                 type: "post",
                 dataType: 'json',
-                data: {
-                    "config": {
-                        config: {
-                            "test": "ddd"
-                        },
-                        server_info: {},
-
-                    }
-
-                },
+                data: data,
                 success: function (jsonData) {
+                    if(jsonData.status==0){
+                        parent.layer.msg('保存成功');
+                    }else{
+                        layer.msg("保存失败",{icon:2});
+                    }
 
                 }
             });

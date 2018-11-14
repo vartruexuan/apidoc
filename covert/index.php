@@ -20,6 +20,8 @@ if ( $method== 'get') {
         $apiobj->showBulidPage();
     }else if($page==2){
         $apiobj->showSetConfig();
+    }else if($page==3){
+        $apiobj->showCommentPage();
     }
 
 #post 生成文档 并返回数据
@@ -82,11 +84,28 @@ if ( $method== 'get') {
         unset( $return_data['data']['config']['config']['covert_password']);
     # 保存配置信息
     }elseif($type==5){
-
+        $params=$_POST;
+        # 验证配置
+        foreach ($params["config"]["module"] as &$module){
+            if(isset($module['path'])){
+              foreach ($module['path'] as &$path){
+                  $path=str_replace('\\',"/",$path);
+              }
+            }
+        }
         #1.拼接配置
-
+        $config=$apiobj->getAllConfig();
+        $params['server_info']=array_merge($config['server_info'],$params['server_info']);
+        if(isset($params['config']['covert_password'])){
+            unset($params['config']['covert_password']);
+        }
+        $params['config']=array_merge($config['config'],$params['config']);
+        $params=array_merge($config,$params);
         #2.写入文件中l
-
+        if(!$apiobj->writeConfig($params)){
+            $return_data['status']=ErrorCode::PARAM_ERROR;
+            $return_data['message']="写入配置失败";
+        }
     }
 
     # 获取工具版本信息

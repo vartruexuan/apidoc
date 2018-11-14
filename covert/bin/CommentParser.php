@@ -30,14 +30,13 @@ class CommentParser {
 
         # 先解析块解析 并剔除
         $comment= $this->parseBlock($comment);
+
         # 获取所有的行数据,并从第一个字符中删除*
         if (preg_match_all ( '#^\s*\*(.*)#m', $comment, $lines ) === false){
             return $this->params;
         }
 
         $this->parseLines ( $lines [1] );
-
-
         return $this->params;
     }
 
@@ -109,19 +108,20 @@ class CommentParser {
      * 块状解析
      * @param $comment 注释
      */
-
     public function parseBlock($comment){
         if($this->params_parse_block){
-
             foreach ($this->params_parse_block as $p){
                $zz='/'.$p.'(?:\{)(.*)(?:\})/is';
                if( preg_match($zz, $comment, $match)){
-                    $this->setParam($p,"{".$match[1]."}");
+                     # 解决编辑器格式化每行前面加 * 问题
+                     $result=implode("\n",array_map(function($n){
+                         return trim(trim($n),'*');
+                     },explode("\n",$match[1])));
+                    $this->setParam($p,"{".$result."}");
                }
                 $comment= preg_replace($zz,'',$comment);
             }
         }
-
         return $comment;
     }
     private function setParam($param, $value) {

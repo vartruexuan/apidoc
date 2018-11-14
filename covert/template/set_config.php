@@ -32,7 +32,7 @@
         <div class="layui-tab-content">
             <!-- 主配置-->
             <div class="layui-tab-item layui-show">
-                <fieldset class="layui-elem-field ">
+                <fieldset class="layui-elem-field server_info">
                     <legend>主配置</legend>
                     <div class="layui-field-box">
                         <form class="layui-form">
@@ -128,7 +128,16 @@
                                                         <!-- 路径列表 -->
                                                         <!-- 01 -->
                                                         <div class="layui-row">
-                                                            <div class="layui-col-md10">
+                                                            <!-- 相对地址 -->
+                                                            <div class="layui-col-md2">
+                                                                <select name="relative"  >
+                                                                    <option value="{{web_root_top}}">根目录上一级</option>
+                                                                    <option value="{{web_root_top2}}">根目录上二级</option>
+                                                                    <option value="{{web_root}}">根目录</option>
+                                                                    <option value="">绝对地址</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="layui-col-md8">
                                                                 <input type="text" name="" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="d://www/wuliao/controllers">
                                                             </div>
                                                             <div class="layui-col-md1">
@@ -140,7 +149,15 @@
                                                         </div>
                                                         <!-- 02 -->
                                                         <div class="layui-row">
-                                                            <div class="layui-col-md10">
+                                                            <div class="layui-col-md2">
+                                                                <select name="relative" >
+                                                                    <option value="{{web_root_top}}">根目录上一级</option>
+                                                                    <option value="{{web_root_top2}}">根目录上二级</option>
+                                                                    <option value="{{web_root}}">根目录</option>
+                                                                    <option value="">绝对地址</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="layui-col-md8">
                                                                 <input type="text" name="" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="d://www/wuliao/controllers/CommentController.php">
                                                             </div>
                                                             <div class="layui-col-md1">
@@ -187,7 +204,7 @@
         </div>
     </div>
 </div>
-<div class="layui-footer" style="position: fixed; bottom: 0;width: 100%;">
+<!--<div class="layui-footer" style="position: fixed; bottom: 0;width: 100%;">
     <div class="layui-bg-gray layui-row layui-col-space10">
 
         <div class="layui-col-md9">
@@ -204,7 +221,7 @@
         </div>
     </div>
 
-</div>
+</div>-->
 
 <script src="<?php echo API_COVERT_JS ?>/plug/jquery.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/plug/layui-v2.3.0/layui/layui.js"></script>

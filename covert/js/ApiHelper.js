@@ -36,10 +36,34 @@ var ApiHelper = {
      */
     bind_event: function () {
         var self = this;
-        // 配置事件
+        //*** 功能列表 ***//
+
+        //刷新 (生成文档)
+        $('#doc_refresh').on('click', function () {
+            self.covert();
+        });
+
+        // 配置(设置)
         $('.btn-setConfig').on('click', function () {
             self.set_config();
         });
+
+        //生成指定模块
+        $('#modules_url').on('click', function () {
+            self.build_url();
+        });
+        //测试注释页面
+        $('#comment').on('click',function () {
+
+            self.showCommentPage();
+        })
+        //帮助页
+        $('#help').on('click',function () {
+
+            self.showHelpPage();
+        })
+        //*** 模块列表 ***//
+
         // 模块列表添加点击事件和样式
         $('.tab-container').delegate('>div>a', 'click', function () {
             $('.tab-container>div>a').css('backgroundColor', '')
@@ -47,14 +71,7 @@ var ApiHelper = {
             $('.tab-container .tab-content').addClass('hide');
             $(this).parent().find('.tab-content').removeClass('hide');
         });
-        //绑定生成指定模块
-        $('#modules_url').on('click', function () {
-            self.build_url();
-        });
-        //刷新
-        $('#doc_refresh').on('click', function () {
-            self.covert();
-        });
+
         return this;
     },
     /**
@@ -191,17 +208,18 @@ var ApiHelper = {
             type: 2,
             title: '指定模块生成链接',
             shadeClose: true,
+            anim: 3,
             shade: [0.5],
-            offset: 't',
+            //offset: 'c',
             // maxmin: true, //开启最大化最小化按钮
-            area: ['900px', '500px'],
+            area: ['70%', '90%'],
             content: page_bulid_url,
         });
     },
     /**
-     * 配置
+     * 注释解析测试
      */
-    set_config: function () {
+    showCommentPage: function () {
         layer.open({
             type: 2,
             title: '配置',
@@ -210,7 +228,78 @@ var ApiHelper = {
             id: 'layer-set-config',
             //   offset: 't',
             maxmin: true, //开启最大化最小化按钮
-            area: ["1000px", "600px"],
+            area: ["60%", "90%"],
+            content: page_comment,
+
+        });
+    },
+    /**
+     * 帮助页面
+     */
+    showHelpPage: function () {
+        layer.open({
+            type: 2,
+            title: '帮助',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 4,
+            id: 'layer-set-config',
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["60%", "90%"],
+            content: page_comment,
+
+        });
+    },
+    /**
+     * 评论测试页面
+     */
+    set_config: function () {
+        layer.open({
+            type: 2,
+            title: '配置',
+            shadeClose: true,
+            shade: false,
+            anim: 1,
+            id: 'layer-set-config',
+            btn:["确定","取消"],
+            yes:function (index,layro) {
+                // 获取配置窗体
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+                //保存配置
+                child_window.setConfig.save();
+            },
+            // 关闭窗口的时候提示 保存
+            cancel:function (index,layro) {
+
+                // 获取配置窗体
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+
+                child_window.layer.confirm("你还未保存,确定关闭?", {icon: 3, title:'提示'}, function (index2) {
+                    child_window.layer.close(index2);
+                    layer.close(index);
+                }, function (index2) {
+
+                    child_window.layer.close(index2);
+                });
+
+                return false;
+            },
+            // 取消关闭 窗口的时候提示 保存
+            btn2:function (index,layro) {
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+                child_window.layer.confirm("你还未保存,确定关闭?", {icon: 3, title:'提示'}, function (index2) {
+                    child_window.layer.close(index2);
+                    layer.close(index);
+                }, function (index2) {
+                    child_window.layer.close(index2);
+                });
+
+                return false;
+            },
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["70%", "90%"],
             content: page_set_config,
 
         });

@@ -46,6 +46,17 @@ class ApiDocument
         "module" => array(// ["title" => '分校小程序', "path" => "D:\www\shangdejigou\wifi\cronus"]
         ),
     );
+    /** 占位符
+     * @var array
+     */
+    public $path_placeholder=array(
+        # 路径地址占位符
+        "path"=>[
+            "{{web_root}}"=>"",//根目录
+            "{{web_root_top}}"=>"",//根目录上一级别
+            "{{web_root_top2}}"=>"",//根目录上二级
+        ],
+    );
     /** 模块生成后状态消息队列
      * @var array
      */
@@ -60,9 +71,9 @@ class ApiDocument
         //文档的一些信息
         'info' => array(
             'version' => "1.0.0",
-            'title' => 'cronus系统接口文档',
+            'title' => '接口文档',
             'description' => '文档描述',
-            'contact' => array('name' => '张鹏娣'),
+            'contact' => array('name' => 'xxx'),
             'license' => array('name' => 'MIT'),
         ),
         //主机地址
@@ -117,13 +128,18 @@ class ApiDocument
         $this->json = array_merge($this->json, $params['server_info']);//合并json配置
         $this->config = array_merge($this->config, $params['config']);//合并公共配置
         # 定界符
-        $this->delimiter=(isset($this->config['delimiter'])&&$this->config['delimiter'])?$this->config['delimiter']:'APIDOC';
+        $this->delimiter = (isset($this->config['delimiter']) && $this->config['delimiter']) ? $this->config['delimiter'] : 'APIDOC';
         ### 添加公共提示信息 ###
 
         $this->addPublicMessage("注释中请定义指定定界符:" . $this->delimiter . ',否则将不会被解析');
         ### 创建初始化需要的目录###
         //$dir = $this->mk_json_dir();//创建json根目录
-
+        ### 初始化 路径占位符 ###
+        $this->placeholder["path"]=array(
+            "{{web_root}}"=>WEB_ROOT,//根目录
+            "{{web_root_top}}"=>dirname(WEB_ROOT),//根目录上一级别
+            "{{web_root_top2}}"=>dirname(dirname(WEB_ROOT)),//根目录上二级
+        );;
         ### 开启session ###
         session_start();
     }
@@ -279,7 +295,7 @@ class ApiDocument
             }
             closedir($hande);
         } catch (ApiDocumentException $se) {
-            $this->moduleMessage[$module['title']]['status'] = 1001;
+            $this->moduleMessage[$module['title']]['status'] = ErrorCode::COMMENT_ERROR;
             $this->moduleMessage[$module['title']]['file_name'] = $fullpath;
             $this->moduleMessage[$module['title']]['com'] = $com;
             $this->moduleMessage[$module['title']]['status_message'] = $se->getMessage();
@@ -287,7 +303,7 @@ class ApiDocument
             return false;
 
         } catch (\Exception $e) {
-            $this->moduleMessage[$module['title']]['status'] = 500;
+            $this->moduleMessage[$module['title']]['status'] = ErrorCode::SERVER_ERROR;
             $this->moduleMessage[$module['title']]['file_name'] = $fullpath;
             $this->moduleMessage[$module['title']]['com'] = $com;
             $this->moduleMessage[$module['title']]['status_message'] = $e->getMessage();
@@ -333,8 +349,8 @@ class ApiDocument
     private function putFile($file_name, $data)
     {
         try {
-            if(!@file_put_contents($file_name, json_encode($data, 2))){
-                $error=error_get_last();
+            if (!@file_put_contents($file_name, json_encode($data, 2))) {
+                $error = error_get_last();
                 throw new ApiDocumentException($error['message']);
             }
         } catch (\Exception $e) {
@@ -394,9 +410,15 @@ class ApiDocument
             #解析参数
             if (array_key_exists('param', $info)) {
                 foreach ($info['param'] as &$param) {
-
-                    if ($parameters = json_decode($param, true)) {
-                        $data['parameters'][] = $parameters;
+                    $param = trim($param);
+                    ### 语法1json ####
+                    if (strlen(ltrim($param, "{")) != strlen($param)) {
+                        if ($parameters = json_decode($param, true)) {
+                            $data['parameters'][] = $parameters;
+                        } else {
+                            throw new \ApiDocumentException('param json格式数据错误');
+                        }
+                        #### 语法2 空格分割法 ###
                     } else {
                         $arr = array();
                         #去除空项
@@ -410,7 +432,7 @@ class ApiDocument
                         $arr['in'] = $p[3];//位置
                         $arr['description'] = isset($p[4]) ? $p[4] : '';//描述*/
                         $arr['required'] = (isset($p[5]) && $p[5] == 'true');//是否必填
-                        $arra['allowEmptyValue'] = (isset($p[6]) && $p[6] == 'true');//是否允许为空(空值则也会发送)
+                        $arr['allowEmptyValue'] = (isset($p[6]) && $p[6] == 'true');//是否允许为空(空值则也会发送)
                         $data['parameters'][] = $arr;
                     }
                 }
@@ -504,6 +526,7 @@ class ApiDocument
     {
         $data = $this->returnSuccess();
         try {
+            $this->mk_json_dir();
             # 先删除之前生成的json文件
             $this->delFile(WEB_ROOT . API_DIST_JSON);
             # 获取模块列表
@@ -522,35 +545,51 @@ class ApiDocument
                     'file_name' => '',//文件地址
                     'com' => '',//注释
                 );
-                # 1.初始化json_cache(模块title\host\tags)
-                $this->json_cache_init($m);
-                # 2.判断是否是数组 字符串(文件,目录)
-                if (is_array($m['path'])) {
-                    $path = $m['path'];
-                } else {
-                    $path = array();
-                    $path[] = $m['path'];
-                }
-                foreach ($path as $p) {
-
-                    # 判断路径是否存在
-                    if (!file_exists($p)) {
-                        throw new ApiDocumentException("config.php > modules > path( {$p} )路径不存在");
-                    }
-                    # 如果是目录
-                    if (is_dir($p)) {
-                        $this->dir_format_json($p, -1, $m);
-                        # 如果是文件
+                try {
+                    # 1.初始化json_cache(模块title\host\tags)
+                    $this->json_cache_init($m);
+                    # 2.判断是否是数组 字符串(文件,目录)
+                    if (is_array($m['path'])) {
+                        $path = $m['path'];
                     } else {
-                        $this->file_format_json($p);
+                        $path = array();
+                        $path[] = $m['path'];
+                    }
+                    foreach ($path as $p) {
+
+                        # 占位符替换
+                        foreach ($this->placeholder["path"] as $k=>$v ){
+                            $p=  str_replace($k,$v,$p);
+                        }
+                        # 判断路径是否存在
+                        if (!file_exists($p)) {
+                            throw new ApiDocumentException("{$p} 路径不存在");
+                        }
+                        # 如果是目录
+                        if (is_dir($p)) {
+                            $this->dir_format_json($p, -1, $m);
+                            # 如果是文件
+                        } else {
+                            $this->file_format_json($p);
+                        }
+
+                    }
+                    # 3.将json_cache 写入文件 (如果无错)
+                    $to_dir = "../dist/json/" . md5($m['title']) . '.json';
+                    if ($to_dir && $this->moduleMessage[$m['title']]['status'] == 0) {
+                        $this->putFile($to_dir, $this->json_cache);
                     }
 
+                } catch (\Exception $ae) {
+                    $this->moduleMessage[$m['title']] = array(
+                        'status' => ErrorCode::MODULE_ERROR,//状态
+                        'status_message' => $ae->getMessage(),
+                        'message' => [],//消息列表
+                        'file_name' => '',//文件地址
+                        'com' => '',//注释
+                    );
                 }
-                # 3.将json_cache 写入文件 (如果无错)
-                $to_dir = "../dist/json/" . md5($m['title']) . '.json';
-                if ($to_dir && $this->moduleMessage[$m['title']]['status'] == 0) {
-                    $this->putFile($to_dir, $this->json_cache);
-                }
+
             }
         } catch (\Exception $e) {
             $data['status'] = ErrorCode::MODULE_ERROR;
@@ -723,6 +762,22 @@ class ApiDocument
         }
 
     }
+
+    # 显示注释解析测试
+    public function showCommentPage($is_auth = true)
+    {
+        $this->showPage('comment', null, [], $is_auth);
+
+    }
+
+    # 显示帮助页面
+    public function showHelpPage($is_auth = true)
+    {
+
+        $this->showPage('help', null, [], $is_auth);
+
+    }
+
     # 显示设置页面
     public function showSetConfig($is_auth = true)
     {
@@ -865,7 +920,7 @@ class ApiDocument
      * 获取模块配置数据
      * @return mixed
      */
-    public function  getConfig()
+    public function getConfig()
     {
         $config = $this->getAllConfig();
         return $config['config'];
@@ -876,9 +931,9 @@ class ApiDocument
      * @param $name
      * @return mixed
      */
-    public  function getServerInfoValue($name)
+    public function getServerInfoValue($name)
     {
-        $server_info=$this->getServerInfoConfig();
+        $server_info = $this->getServerInfoConfig();
         return $server_info[$name];
 
     }
@@ -888,12 +943,12 @@ class ApiDocument
      * @param $name
      * @param $value
      */
-    public  function setServerInfoValue($name,$value)
+    public function setServerInfoValue($name, $value)
     {
-       $config= $this->getAllConfig();
-       $config['server_info'][$name]=$value;
-       # 写入配置
-       return $this->writeConfig($config);
+        $config = $this->getAllConfig();
+        $config['server_info'][$name] = $value;
+        # 写入配置
+        return $this->writeConfig($config);
     }
 
     /**
@@ -901,9 +956,9 @@ class ApiDocument
      * @param $name
      * @return mixed
      */
-    public function  getConfigValue($name)
+    public function getConfigValue($name)
     {
-        $config=$this->getConfig();
+        $config = $this->getConfig();
         return $config[$name];
 
     }
@@ -913,10 +968,10 @@ class ApiDocument
      * @param $name
      * @param $value
      */
-    public function  setConfigValue($name,$value)
+    public function setConfigValue($name, $value)
     {
-        $config= $this->getAllConfig();
-        $config['config'][$name]=$value;
+        $config = $this->getAllConfig();
+        $config['config'][$name] = $value;
         # 写入配置
         return $this->writeConfig($config);
     }
@@ -924,33 +979,33 @@ class ApiDocument
     /**
      * 写入配置
      */
-    public function writeConfig($config=array())
+    public function writeConfig($config = array())
     {
 
-        $config_path=__DIR__.'/../config/Config.php';
+        $config_path = __DIR__ . '/../config/Config.php';
         $content = "<?php\n";
         $content .= 'return ';
         $content .= var_export($config, true);
         $content .= ";\n";
         # 创建并打开配置文件
-        touch ($config_path);
+        touch($config_path);
         $filePointer = fopen($config_path, 'r+');
 
         # 设置文件权限
         chmod($config_path, 0640);
 
         # 文件不存在
-        if(!is_resource ($filePointer)) {
-           return false;
+        if (!is_resource($filePointer)) {
+            return false;
         }
 
         # 尝试枷锁
-        if(!flock($filePointer, LOCK_EX)) {
+        if (!flock($filePointer, LOCK_EX)) {
             return false;
         }
 
         # 编写配置并释放锁
-        ftruncate ($filePointer, 0);
+        ftruncate($filePointer, 0);
         fwrite($filePointer, $content);
         fflush($filePointer);
         flock($filePointer, LOCK_UN);

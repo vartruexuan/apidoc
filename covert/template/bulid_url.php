@@ -74,7 +74,7 @@
 <nav class="navbar navbar-default navbar-fixed-bottom" style="padding: 6px;">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-6 col-md-6 col-md-6">
+            <div class="col-md-11 col-md-11 col-md-11">
                 <div class="input-group ">
                     <span class="input-group-addon" id="sizing-addon1">url:</span>
                     <input type="text" class="form-control" name="input_url" aria-label="Text input with multiple buttons"

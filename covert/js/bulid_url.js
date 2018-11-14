@@ -77,7 +77,6 @@ $(function () {
     })
     //删除链接
     $('.urls-list').delegate('a >span.url-del', 'click', function () {
-
         var self = this;
         parent.layer.confirm('你确定要删除该链接？', {
             btn: ['确定', '取消'] //按钮
@@ -88,12 +87,9 @@ $(function () {
             //进行删除操作
             del_url(url);
         });
-
-
     });
 
 })
-
 
 /**
  * 删除链接
