@@ -111,7 +111,7 @@ class CommentParser {
     public function parseBlock($comment){
         if($this->params_parse_block){
             foreach ($this->params_parse_block as $p){
-               $zz='/'.$p.'(?:\{)(.*)(?:\})/is';
+               $zz='/'.$p.'(?:\{)(.*)(?:\})'.$p.'/is';
                if( preg_match($zz, $comment, $match)){
                      # 解决编辑器格式化每行前面加 * 问题
                      $result=implode("\n",array_map(function($n){

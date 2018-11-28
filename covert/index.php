@@ -6,22 +6,25 @@
  * Time: 14:42
  */
 require __DIR__ . '/bin/ApiDocument.php';
+
 $apiobj = ApiDocument::getObj();
+
 # 获取配置 权限验证
 
 # get 展示生成页面
 $method=strtolower($_SERVER['REQUEST_METHOD']);
 if ( $method== 'get') {
     $page=isset($_GET['page'])?$_GET['page']:0;
-    if ($page == 0) {
+    if ($page == 0) {//主页面生成文档
         $apiobj->showCovertPage();
-
-    } else if ($page == 1) {
+    } else if ($page == 1) {//生成链接
         $apiobj->showBulidPage();
-    }else if($page==2){
+    }else if($page==2){//配置设置
         $apiobj->showSetConfig();
-    }else if($page==3){
+    }else if($page==3){//注释协助
         $apiobj->showCommentPage();
+    }else if($page==4){//历史版本页面
+        $apiobj->showHistoryPage(false);
     }
 
 #post 生成文档 并返回数据
@@ -85,6 +88,7 @@ if ( $method== 'get') {
     # 保存配置信息
     }elseif($type==5){
         $params=$_POST;
+        $params["config"]["module"]=!isset($params["config"]["module"])||!$params["config"]["module"]?[]:$params["config"]["module"];
         # 验证配置
         foreach ($params["config"]["module"] as &$module){
             if(isset($module['path'])){
@@ -106,10 +110,36 @@ if ( $method== 'get') {
             $return_data['status']=ErrorCode::PARAM_ERROR;
             $return_data['message']="写入配置失败";
         }
-    }
+    # 注释生成与逆向
+    }elseif($type==6){
+        $params=$_POST;
+        # 是否逆向
+        $is_reverse=isset($params['is_reverse'])&&$params['is_reverse']?1:0;
 
+        # 参数验证
+        try{
+
+            # 逆向
+            if($is_reverse){
+                $params=$params['comment'];
+                $return_data['data']['result']=$apiobj->comment_covert_reverse($params,$is_reverse,2);
+
+                # 生成注释
+            }else{
+                # 语法1
+                $return_data['data']['result'][]=$apiobj->comment_covert_reverse($params,$is_reverse,1);
+                # 语法2
+                $return_data['data']['result'][]=$apiobj->comment_covert_reverse($params,$is_reverse,2);
+            }
+
+
+
+        }catch (\Exception $e){
+            $return_data['status']=500;
+            $return_data['message']=$e->getMessage();
+        }
+    }
     # 获取工具版本信息
     $return_data['data']['info'] = $apiobj->getApiDocmentInfo();
     $apiobj->asJson($return_data);
-
 }

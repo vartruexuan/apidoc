@@ -37,7 +37,13 @@ var ApiHelper = {
     bind_event: function () {
         var self = this;
         //*** 功能列表 ***//
-
+        //来个动画效果
+        $("div.gongneng").find("button").on("mouseover",function () {
+            $(this).find("i.layui-icon").addClass("layui-anim layui-anim-rotate layui-anim-loop");
+        });
+        $("div.gongneng").find("button").on("mouseout",function () {
+            $(this).find("i.layui-icon").removeClass("layui-anim layui-anim-rotate layui-anim-loop");
+        });
         //刷新 (生成文档)
         $('#doc_refresh').on('click', function () {
             self.covert();
@@ -71,7 +77,10 @@ var ApiHelper = {
             $('.tab-container .tab-content').addClass('hide');
             $(this).parent().find('.tab-content').removeClass('hide');
         });
-
+        //版本历史
+        $("#version_history").on("click",function () {
+            self.showHistoryPage();
+        });
         return this;
     },
     /**
@@ -145,7 +154,7 @@ var ApiHelper = {
             //添加tabs 标题
             var html_title = "";
             var html_content = "";
-            html_title += '<li  class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span style="color: ' + (modules[i]['status'] == 0 ? "green" : "red") + ';"><i class="layui-icon">' + (modules[i]['status'] == 0 ? '&#xe605;' : '&#x1006;') + '</i> ' + i + '</span></a></li>';
+            html_title += '<li  class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span style="color: ' + (modules[i]['status'] == 0 ? "green" : "red") + ';"><i class="layui-icon">' + (modules[i]['status'] == 0 ? '&#xe605;' : '&#x1006;') + '</i> ' + i + '</span><span class="layui-badge layui-bg-green">'+modules[i]['api_count']+'</span></a></li>';
             html_content += '<div  class="layui-tab-item " id="' + id + '">' + dd_con + '</div>';
 
             $('.covert_module .layui-tab-title').append(html_title);
@@ -222,21 +231,25 @@ var ApiHelper = {
     showCommentPage: function () {
         layer.open({
             type: 2,
-            title: '配置',
+            title: '注释协助',
             shadeClose: true,
             shade: [0.5],
-            id: 'layer-set-config',
+            id: 'layer-comment-page',
             //   offset: 't',
             maxmin: true, //开启最大化最小化按钮
-            area: ["60%", "90%"],
+            area: ["98%", "90%"],
             content: page_comment,
-
         });
+        //去掉最小化按钮
+        $('.layui-layer-min').remove();
     },
     /**
      * 帮助页面
      */
     showHelpPage: function () {
+
+        layer.msg("待定功能");
+        return;
         layer.open({
             type: 2,
             title: '帮助',
@@ -251,6 +264,22 @@ var ApiHelper = {
 
         });
     },
+    showHistoryPage: function () {
+
+        layer.open({
+            type: 2,
+            title: '历史版本',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 4,
+            id: 'lay-version_history',
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["60%", "90%"],
+            content: page_history,
+
+        });
+    },
     /**
      * 评论测试页面
      */
@@ -258,8 +287,8 @@ var ApiHelper = {
         layer.open({
             type: 2,
             title: '配置',
-            shadeClose: true,
-            shade: false,
+           // shadeClose: true,
+            shade: ['0.5'],
             anim: 1,
             id: 'layer-set-config',
             btn:["确定","取消"],
@@ -303,6 +332,8 @@ var ApiHelper = {
             content: page_set_config,
 
         });
+        //去掉最小化按钮
+        $('.layui-layer-min').remove();
     },
     /**
      *  指定元素闪烁

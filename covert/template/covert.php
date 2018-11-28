@@ -18,12 +18,12 @@
     <link rel="stylesheet" href="<?php echo API_COVERT_JS ?>/plug/layui-v2.3.0/layui/css/layui.css">
     <style>
         body{
-          background:url(<?php echo API_COVERT_IMG ?>/bodybg.jpg);
+         background:url(<?php echo API_COVERT_IMG ?>/bodybg.jpg);
         }
         .title{font-size: 18px;}
     </style>
 </head>
-<body class="">
+<body class="" id="mydiv" >
 <!-- 配置数据 -->
 <div>
     <input type="hidden" name="api_root_name" value="<?php echo API_ROOT_NAME ?>">
@@ -54,13 +54,13 @@
         <!--  操作列表  -->
         <div>
             <fieldset class="layui-elem-field site-demo-button">
-                <div class="layui-btn-group layui-btn-container">
-                    <button class="layui-btn layui-btn-normal layui-btn-sm" id="doc_refresh"><i class="layui-icon">&#xe9aa;</i> 生成文档</button>
+                <div class="layui-btn-group layui-btn-container gongneng">
+                    <button class="layui-btn layui-btn-normal layui-btn-sm" id="doc_refresh"><i class="layui-icon ">&#xe9aa;</i> 生成文档</button>
                     <button class="layui-btn layui-btn-sm btn-setConfig" ><i class="layui-icon">&#xe614;</i> 配置</button>
                     <button class="layui-btn layui-btn-sm" id="modules_url"><i class="layui-icon">&#xe64c;</i> 指定模块生成链接</button>
-                    <button class="layui-btn layui-btn-sm" id="comment"><span class="glyphicon ">测试注释</span></button>
+                    <button class="layui-btn layui-btn-sm" id="comment"><i class="layui-icon">&#xe64e;</i> 注释协助</button>
                     <button class="layui-btn layui-btn-sm" id="help"><span class="glyphicon ">帮助</span></button>
-                    <button class="layui-btn layui-btn-sm" id="test"><span class="glyphicon ">版本历史</span></button>
+                    <button class="layui-btn layui-btn-sm" id="version_history"><span class="glyphicon ">版本历史</span></button>
                 </div>
             </fieldset>
         </div>
@@ -92,7 +92,27 @@
         </div>
 
     </blockquote>
+    <script type="text/javascript">
+        window.onload = function() {
+            //配置
+            var config = {
+                vx: 4,	//小球x轴速度,正为右，负为左
+                vy: 4,	//小球y轴速度
+                height: 2,	//小球高宽，其实为正方形，所以不宜太大
+                width: 2,
+                count: 200,		//点个数
+                color: "121, 162, 185", 	//点颜色
+                stroke: "130,255,255", 		//线条颜色
+                dist: 6000, 	//点吸附距离
+                e_dist: 20000, 	//鼠标吸附加速距离
+                max_conn: 10 	//点到点最大连接数
+            }
 
+            //调用
+            CanvasParticle(config);
+        }
+    </script>
+    <script type="text/javascript" src="<?php echo API_COVERT_JS ?>/canvas-particle.js"></script>
     <!-- js 文件-->
     <script src="<?php echo API_COVERT_JS ?>/plug/jquery.js"></script>
     <script src="<?php echo API_COVERT_JS ?>/plug/layui-v2.3.0/layui/layui.js"></script>

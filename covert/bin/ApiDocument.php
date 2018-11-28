@@ -27,12 +27,12 @@ class ApiDocument
      * 定界标识
      * @var string
      */
-    private $delimiter = "SUNLANDS";
+    public $delimiter = "SUNLANDS";
     /**
      * 版本
      * @var string
      */
-    private $version = "php-apidoc 1.0";
+    private $version = "php-apidoc 3.0";
     /**
      * 公共配置
      * @var array
@@ -49,12 +49,12 @@ class ApiDocument
     /** 占位符
      * @var array
      */
-    public $path_placeholder=array(
+    public $placeholder = array(
         # 路径地址占位符
-        "path"=>[
-            "{{web_root}}"=>"",//根目录
-            "{{web_root_top}}"=>"",//根目录上一级别
-            "{{web_root_top2}}"=>"",//根目录上二级
+        "path" => [
+            "{{web_root}}" => "",//根目录
+            "{{web_root_top}}" => "",//根目录上一级别
+            "{{web_root_top2}}" => "",//根目录上二级
         ],
     );
     /** 模块生成后状态消息队列
@@ -135,10 +135,13 @@ class ApiDocument
         ### 创建初始化需要的目录###
         //$dir = $this->mk_json_dir();//创建json根目录
         ### 初始化 路径占位符 ###
-        $this->placeholder["path"]=array(
-            "{{web_root}}"=>WEB_ROOT,//根目录
-            "{{web_root_top}}"=>dirname(WEB_ROOT),//根目录上一级别
-            "{{web_root_top2}}"=>dirname(dirname(WEB_ROOT)),//根目录上二级
+        $this->placeholder['host'] = array(
+            "{{local_host}}" => $_SERVER['HTTP_HOST'],//当前域名
+        );
+        $this->placeholder["path"] = array(
+            "{{web_root}}" => WEB_ROOT,//根目录
+            "{{web_root_top}}" => dirname(WEB_ROOT),//根目录上一级别
+            "{{web_root_top2}}" => dirname(dirname(WEB_ROOT)),//根目录上二级
         );;
         ### 开启session ###
         session_start();
@@ -157,7 +160,7 @@ class ApiDocument
     private function getDocParserObj()
     {
         $deparser = new CommentParser();
-        $deparser->params_parse_block = array_merge($deparser->params_parse_block, array('examples'));
+        $deparser->params_parse_block = array_merge($deparser->params_parse_block, array('examples', "responses"));
         $deparser->params_array_keys = array_merge($deparser->params_array_keys, array('param'));
         return $deparser;
     }
@@ -287,7 +290,7 @@ class ApiDocument
                 }
                 #如果是文件
                 if (is_file($fullpath)) {
-                    $result = $this->file_format_json($fullpath, $com);
+                    $result = $this->file_format_json($fullpath, $com, $module);
                     if (!$result) {
                         return false;
                     }
@@ -320,7 +323,7 @@ class ApiDocument
      * @param string $ext_filter 过滤指定文件
      * @return array
      */
-    private function file_format_json($path, &$comment = null, $ext_filter = "*")
+    private function file_format_json($path, &$comment = null, &$module = null, $ext_filter = "*")
     {
         if (!file_exists($path)) {
             throw new ApiDocumentException("{$path}文件不存在");
@@ -332,6 +335,9 @@ class ApiDocument
             $matchs = [];
             preg_match_all('@/\*\*' . preg_quote($this->delimiter) . '.*?\*/@s', $contents, $matchs);
             foreach ($matchs[0] as $com) {
+                if ($module) {
+                    $this->moduleMessage[$module['title']]['api_count']++;
+                }
                 $comment = $com;
                 #格式化注释 到json数组中
                 $result = $this->comment_format($com, $path);
@@ -357,6 +363,107 @@ class ApiDocument
             throw new ApiDocumentException('写入json文件失败:' . $e->getMessage());
         }
     }
+
+    /**
+     * 参数和注释互转
+     * @param $params 参数或者注释
+     * @param bool $is_reverse 是否为注释逆向(默认false)
+     * @param int $comment_type 1.空格分隔法 2. json语法
+     * @return array|mixed|string
+     * @throws ApiDocumentException
+     */
+    public function comment_covert_reverse($params,$is_reverse=false,$comment_type=1)
+    {
+        if($is_reverse){
+            $this->comment_format($params);
+            $result=[];
+            # 格式化数据
+            foreach ($this->json_cache["paths"] as $url=>$api){
+
+                foreach ($api as $method =>$a){
+                    $result[]=array(
+                        "url"=>$url,
+                        "method"=>$method,
+                        "title"=>$a["summary"],
+                        "description"=>$a["description"],
+                        "tags"=>$a["tags"],
+                        "parameters"=>isset($a["parameters"])?$a["parameters"]:[],
+                        "responses"=>isset($a["responses"])?$a["responses"]:[],
+                    );
+                }
+            }
+          return  $result;
+        }else{
+
+            # 定界符
+            $comment="/**".$this->delimiter."\n";
+            # url
+            if(!isset($params['url']) || !$params['url']){
+                throw new \ApiDocumentException("url为必填项");
+            }
+            $comment.="* @url ".$params['url']."\n";
+            # 请求方式
+            $comment.="* @method ".$params['method']."\n";
+
+            # 接口名称
+            $comment.="* @summary ".$params['title']."\n";
+            # 接口描述
+            if(isset($params['description'])&&$params['description']){
+                $comment.="* @description ".$params['description']."\n";
+            }
+
+            # 标签
+            if(isset($params['tags'])&&$params['tags']){
+                $tags=implode(" ",array_filter(explode(" ",$params['tags'])));
+                $comment.="* @tags ".$tags."\n";
+            }
+            # 参数
+            if(isset($params["parameters"])&&$params["parameters"]){
+
+                foreach ($params["parameters"] as $p){
+                    $p["default"]=isset($p["default"])&&$p["default"]?$p["default"]:"/";
+                    $p["description"]=isset($p["description"])&&$p["description"]?$p["description"]:"/";
+                    $p["required"]=isset($p["required"])&&$p["required"]?$p["required"]:"false";
+                    $p["allowEmptyValue"]=isset($p["allowEmptyValue"])&&$p["allowEmptyValue"]?$p["allowEmptyValue"]:"true";
+                    if($comment_type==1){
+                        $comment.="* @param {$p["type"]} {$p["name"]} {$p["default"]} {$p["in"]} {$p["description"]} {$p["required"]} {$p["allowEmptyValue"]}\n";
+                    }elseif ($comment_type==2){
+                        $comment.="* @param ".json_encode($p,JSON_UNESCAPED_UNICODE)."\n";
+                    }
+                }
+            }
+            # 响应数据
+            if(isset($params["responses"])&&$params["responses"]){
+                $responses=[];
+                foreach ($params["responses"] as $r){
+
+                    $result=json_decode($r["examples"],true);
+                    if(!$result){
+                        throw new \ApiDocumentException("响应数据不是正确的json格式数据");
+                    }
+                    # 替换一些特殊符号 "
+                    $result=$this->json_value_replace($result);
+                    $responses[$r["status"]]["examples"][$r["produces"]]=$result;
+                    if(isset($r["description"])){
+                        $responses[$r["status"]]["description"]=$r["description"];
+                    }
+                }
+
+                # json 格式化加上*
+                $responses=$this->jsonFormat($responses);
+                $responses=" @responses".$responses."responses";
+                $responses=implode("\n",array_map(function($n){
+                    return "*".$n;
+                },explode("\n",$responses)));
+
+                $comment.=$responses."\n";
+
+            }
+            $comment.="*/";
+            return $comment;
+        }
+    }
+
 
     /**
      * 格式化注释到json中
@@ -430,7 +537,7 @@ class ApiDocument
                         $arr['name'] = $p[1];//名字
                         $arr['default'] = $p[2] == '/' ? '' : $p[2];//默认值
                         $arr['in'] = $p[3];//位置
-                        $arr['description'] = isset($p[4]) ? $p[4] : '';//描述*/
+                        $arr['description'] = isset($p[4]) &&$p[4]!='/' ? $p[4] : '';//描述*/
                         $arr['required'] = (isset($p[5]) && $p[5] == 'true');//是否必填
                         $arr['allowEmptyValue'] = (isset($p[6]) && $p[6] == 'true');//是否允许为空(空值则也会发送)
                         $data['parameters'][] = $arr;
@@ -464,12 +571,21 @@ class ApiDocument
                 $data['consumes'] = [$info['consumes']];
             }
             #解析响应数据
-            if (array_key_exists('return', $info)) {
-                $arr = [];
-                $return = explode(' ', $info['return']);
-                $arr["200"]['description'] = isset($return[1]) ? $return[1] : '';//名字
-                //  $arr["200"]['schema']['type']='array';
-                $data['responses'] = $arr;
+            /*            if (array_key_exists('return', $info)) {
+                            $arr = [];
+                            $return = explode(' ', $info['return']);
+                            $arr["200"]['description'] = isset($return[1]) ? $return[1] : '';//名字
+                            //  $arr["200"]['schema']['type']='array';
+                            $data['responses'] = $arr;
+                        }*/
+            # 解析响应数据
+            if (array_key_exists('responses', $info)) {
+                $v = json_decode($info['responses'], 1);
+
+                if (!$v) {
+                    throw new \ApiDocumentException('responses 的数据无法解析,格式可能不正确');
+                }
+                $data['responses'] = $v;
             }
             # 解析案例 说明
             if (array_key_exists('examples', $info)) {
@@ -542,6 +658,7 @@ class ApiDocument
                     'status' => 0,//状态
                     'status_message' => '',
                     'message' => [],//消息列表
+                    'api_count' => 0,//接口数量
                     'file_name' => '',//文件地址
                     'com' => '',//注释
                 );
@@ -549,6 +666,9 @@ class ApiDocument
                     # 1.初始化json_cache(模块title\host\tags)
                     $this->json_cache_init($m);
                     # 2.判断是否是数组 字符串(文件,目录)
+                    if (!isset($m['path']) || !$m['path']) {
+                        throw new \ApiDocumentException('path 注释地址为空');
+                    }
                     if (is_array($m['path'])) {
                         $path = $m['path'];
                     } else {
@@ -558,8 +678,8 @@ class ApiDocument
                     foreach ($path as $p) {
 
                         # 占位符替换
-                        foreach ($this->placeholder["path"] as $k=>$v ){
-                            $p=  str_replace($k,$v,$p);
+                        foreach ($this->placeholder["path"] as $k => $v) {
+                            $p = str_replace($k, $v, $p);
                         }
                         # 判断路径是否存在
                         if (!file_exists($p)) {
@@ -581,15 +701,10 @@ class ApiDocument
                     }
 
                 } catch (\Exception $ae) {
-                    $this->moduleMessage[$m['title']] = array(
-                        'status' => ErrorCode::MODULE_ERROR,//状态
-                        'status_message' => $ae->getMessage(),
-                        'message' => [],//消息列表
-                        'file_name' => '',//文件地址
-                        'com' => '',//注释
-                    );
+                    $this->moduleMessage[$m['title']]['status'] = ErrorCode::MODULE_ERROR;
+                    $this->moduleMessage[$m['title']]['status_message'] = $ae->getMessage();
+                    $this->moduleMessage[$m['title']]['message'] = $ae->getMessage();
                 }
-
             }
         } catch (\Exception $e) {
             $data['status'] = ErrorCode::MODULE_ERROR;
@@ -744,44 +859,37 @@ class ApiDocument
     }
 
     # 显示生成链接页面
-    public function showBulidPage($is_auth = true)
+    public function showBulidPage($is_auth = true, $is_window = true)
     {
-        //验证什么方式打开(非窗口跳生成页面)
-        $ref = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : '';
-        $upath = substr($ref, strpos($ref, '/', 8));
-        if ($ref && in_array($upath, [API_COVERT, API_COVERT . '/'])) {
-            //查询模块列表
-            $modules = $this->getAllModule();
-            //已有链接列表
-            $urls = $this->getAllModuleUrls();
-            $params['modules'] = $modules;
-            $params['urls'] = $urls;
-            $this->showPage('bulid_url', 'php', $params, $is_auth);
-        } else {
-            $this->redirectPage();
-        }
-
+        //查询模块列表
+        $modules = $this->getAllModule();
+        //已有链接列表
+        $urls = $this->getAllModuleUrls();
+        $params['modules'] = $modules;
+        $params['urls'] = $urls;
+        $this->showPage('bulid_url', 'php', $params, $is_auth, $is_window);
     }
 
     # 显示注释解析测试
-    public function showCommentPage($is_auth = true)
+    public function showCommentPage($is_auth = true, $is_window = true)
     {
-        $this->showPage('comment', null, [], $is_auth);
-
+        $this->showPage('comment', null, [], $is_auth, $is_window);
     }
 
     # 显示帮助页面
-    public function showHelpPage($is_auth = true)
+    public function showHelpPage($is_auth = true, $is_window = true)
     {
-
-        $this->showPage('help', null, [], $is_auth);
-
+        $this->showPage('help', null, [], $is_auth, $is_window);
     }
-
-    # 显示设置页面
-    public function showSetConfig($is_auth = true)
+    # 显示历史版本
+    public function showHistoryPage($is_auth = true, $is_window = true)
     {
-        $this->showPage('set_config', null, [], $is_auth);
+        $this->showPage('history', null, [], $is_auth, $is_window);
+    }
+    # 显示设置页面
+    public function showSetConfig($is_auth = true, $is_window = true)
+    {
+        $this->showPage('set_config', null, [], $is_auth, $is_window);
     }
 
     # 跳转指定页面
@@ -796,8 +904,18 @@ class ApiDocument
      * @param string $name 模板名
      * @param array $params 需要导入到页面的参数 ['参数名'=>参数值]
      */
-    public function showPage($name = "covert", $ext = "php", $params = array(), $is_auth = true)
+    public function showPage($name = "covert", $ext = "php", $params = array(), $is_auth = true, $is_window = false)
     {
+
+        # 窗口页面非窗口模式打开跳转首页
+        if ($is_window) {
+            $ref = array_key_exists('HTTP_REFERER', $_SERVER) ? $_SERVER['HTTP_REFERER'] : '';
+            $upath = substr($ref, strpos($ref, '/', 8));
+            if (!($ref && in_array($upath, [API_COVERT, API_COVERT . '/']))) {
+                $this->redirectPage();
+            }
+        }
+
         $ext = $ext ? $ext : 'php';
         if ($is_auth && !$this->checkAuth()) {
             $this->showAuthPage();
@@ -1011,5 +1129,87 @@ class ApiDocument
         flock($filePointer, LOCK_UN);
         fclose($filePointer);
         return true;
+    }
+
+    ################## jsonc处理函数 #########################
+
+    /** Json数据格式化
+     * @param  Mixed $data 数据
+     * @param  String $indent 缩进字符，默认4个空格
+     * @return JSON
+     */
+    function jsonFormat($data, $indent = null)
+    {
+
+        // 对数组中每个元素递归进行urlencode操作，保护中文字符
+        array_walk_recursive($data, function (&$val) {
+            if ($val !== true && $val !== false && $val !== null) {
+                $val = urlencode($val);
+            }
+        });
+
+        // json encode
+        $data = json_encode($data);
+
+        // 将urlencode的内容进行urldecode
+        $data = urldecode($data);
+
+        // 缩进处理
+        $ret = '';
+        $pos = 0;
+        $length = strlen($data);
+        $indent = isset($indent) ? $indent : '    ';
+        $newline = "\n";
+        $prevchar = '';
+        $outofquotes = true;
+
+        for ($i = 0; $i <= $length; $i++) {
+
+            $char = substr($data, $i, 1);
+
+            if ($char == '"' && $prevchar != '\\') {
+                $outofquotes = !$outofquotes;
+            } elseif (($char == '}' || $char == ']') && $outofquotes) {
+                $ret .= $newline;
+                $pos--;
+                for ($j = 0; $j < $pos; $j++) {
+                    $ret .= $indent;
+                }
+            }
+
+            $ret .= $char;
+
+            if (($char == ',' || $char == '{' || $char == '[') && $outofquotes) {
+                $ret .= $newline;
+                if ($char == '{' || $char == '[') {
+                    $pos++;
+                }
+
+                for ($j = 0; $j < $pos; $j++) {
+                    $ret .= $indent;
+                }
+            }
+
+            $prevchar = $char;
+        }
+
+        return $ret;
+    }
+
+    /**
+     * 给json字符有 " 特殊符号加上\转义
+     * @param $result
+     * @return mixed
+     */
+    public function json_value_replace($result)
+    {
+        foreach ($result as $k => &$v) {
+            if (is_array($v)) {
+                $v = $this->json_value_replace($v);
+            } else {
+                $v = str_replace('"', '\"', $v);
+            }
+        }
+        return $result;
     }
 }
