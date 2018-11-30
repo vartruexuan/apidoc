@@ -37,6 +37,8 @@ if ( $method== 'get') {
      *              3.删除指定模块链接
      *              4.获取配置信息
      *              5.保存配置信息
+     *              6.注释生成与逆向
+     *              7.修改密码
      */
     # 需要验证权限的操作
     $auth_types = [0, 1, 3,4,5];
@@ -118,12 +120,10 @@ if ( $method== 'get') {
 
         # 参数验证
         try{
-
             # 逆向
             if($is_reverse){
                 $params=$params['comment'];
                 $return_data['data']['result']=$apiobj->comment_covert_reverse($params,$is_reverse,2);
-
                 # 生成注释
             }else{
                 # 语法1
@@ -133,7 +133,29 @@ if ( $method== 'get') {
             }
 
 
+        }catch (\Exception $e){
+            $return_data['status']=500;
+            $return_data['message']=$e->getMessage();
+        }
+    }elseif($type==7){
 
+        try{
+            $pwd=isset($_POST["pwd"])?$_POST["pwd"]:"";
+            $new_pwd=isset($_POST["new_pwd"])?$_POST["new_pwd"]:"";
+            $covert_password=$apiobj->getConfigValue("covert_password");
+            if($pwd&&$new_pwd){
+                //验证密码
+                if($covert_password==$pwd){
+                    if(!$apiobj->setConfigValue("covert_password",$new_pwd)){
+                        throw new Exception("修改失败");
+                    }
+                    $apiobj->checkPwd($new_pwd);
+                }else{
+                    throw new Exception("密码错误");
+                }
+            }else{
+                throw new Exception("参数不能为空");
+            }
         }catch (\Exception $e){
             $return_data['status']=500;
             $return_data['message']=$e->getMessage();

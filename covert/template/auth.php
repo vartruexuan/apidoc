@@ -48,6 +48,7 @@
                         <h3 class="panel-title">权限验证</h3>
                     </div>
                     <div class="panel-body" style="min-height: 200px;">
+                        <span>如果您是第一次使用,密码：123</span>
                         <div class="input-group">
                             <input type="password" name="pwd" class="form-control" placeholder="请输入密码..">
                             <span class="input-group-btn">
@@ -58,7 +59,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

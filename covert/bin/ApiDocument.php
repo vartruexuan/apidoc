@@ -256,6 +256,11 @@ class ApiDocument
         if (array_key_exists('host', $module) && $module['host']) {
             $this->json_cache['host'] = $module['host'];
         }
+        #host占位符替换
+        # 占位符替换
+        foreach ($this->placeholder["host"] as $k => $v) {
+            $this->json_cache['host'] = str_replace($k, $v,$this->json_cache['host']);
+        }
         # 设置模块标签
         if (array_key_exists('tags', $module) && $module['tags'] && is_array($module['tags'])) {
             $this->json_cache['tags'] = array_merge($this->json_cache['tags'], $module['tags']);
@@ -459,6 +464,7 @@ class ApiDocument
                 $comment.=$responses."\n";
 
             }
+            $comment.="* @return array\n";
             $comment.="*/";
             return $comment;
         }

@@ -81,6 +81,11 @@ var ApiHelper = {
         $("#version_history").on("click",function () {
             self.showHistoryPage();
         });
+        //修改密码
+        $("#update_pwd").on('click',function () {
+            self.showUpdatePwdPage();
+        });
+
         return this;
     },
     /**
@@ -264,6 +269,9 @@ var ApiHelper = {
 
         });
     },
+    /**
+     * 版本历史
+     */
     showHistoryPage: function () {
 
         layer.open({
@@ -274,12 +282,84 @@ var ApiHelper = {
             anim: 4,
             id: 'lay-version_history',
             //   offset: 't',
-            maxmin: true, //开启最大化最小化按钮
+            btn:["好哒"],
+            maxmin: false, //开启最大化最小化按钮
             area: ["60%", "90%"],
             content: page_history,
 
         });
     },
+    /**
+     * 修改密码
+     */
+    showUpdatePwdPage: function () {
+        var self=this;
+        var template="";
+        template+="<div style='padding: 20px;'>";
+        template+="     <label>密码(第一次为:123)：<input type='password' name='input-password' placeholder='请输入密码' class='layui-input' title='密码' style='margin-bottom: 10px;'/></label>";
+        template+="     <label >新密码：<input type='password' name='input-new-password' placeholder='请输入新密码' class='layui-input' title='新密码' style='margin-bottom: 10px;'/></label>";
+        template+="     <label >二次密码：<input type='password' name='input-two-password' placeholder='请输入二次密码' class='layui-input' title='二次密码'/></label>";
+        template+="</div>";
+        layer.open({
+            type: 1,
+            title: '修改密码',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 3,
+            id: 'lay-update-pwd',
+            //   offset: 't',
+            btn:["确认修改","取消"],
+            maxmin: false, //开启最大化最小化按钮
+            area: ["400px", "360px"],
+            yes:function (index) {
+               // 获取数据
+                var pwd=$("input[name=input-password]").val().trim();
+                var new_pwd=$("input[name=input-new-password]").val().trim();
+                var two_pwd=$("input[name=input-two-password]").val().trim();
+                if(!pwd){
+                    layer.msg("请输入密码",{icon:2});
+                    return;
+                }
+                if(!new_pwd || !two_pwd ) {
+                    layer.msg("请输入新密码", {icon: 2});
+                    return;
+                }
+                if(new_pwd !=two_pwd ) {
+                    layer.msg("两次新密码不一致", {icon: 2});
+                    return;
+                }
+                if(pwd==new_pwd){
+                    layer.msg("新密码未修改", {icon: 2});
+                    return;
+                }
+                    // 请求接口
+               self.ajax({
+                   url:post_update_pwd,
+                   type:"post",
+                   dataType:"json",
+                   data:{
+                     "pwd":pwd,
+                     "new_pwd":new_pwd
+                   },
+                   success:function (jsonData) {
+                       if(jsonData.status==0){
+                           layer.msg("修改成功",{icon:1});
+                           setTimeout(function () {
+                               top.window.location.reload();
+                           },1000);
+                       }else{
+                           layer.msg(jsonData.message,{icon:2});
+                       }
+
+                   }
+               });
+
+            },
+
+            content: template,
+        });
+    },
+
     /**
      * 评论测试页面
      */

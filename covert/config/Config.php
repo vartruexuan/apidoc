@@ -13,13 +13,23 @@ return array (
   ),
   'config' => 
   array (
-    'covert_password' => '12345678',
+    'covert_password' => '123',
     'delimiter' => 'SUNLANDS',
     'module' => 
     array (
       0 => 
       array (
         'title' => 'module49',
+        'version' => 'v1.0',
+        'description' => '',
+        'path' => 
+        array (
+          0 => '{{web_root_top}}',
+        ),
+      ),
+      1 => 
+      array (
+        'title' => 'module3',
         'version' => 'v1.0',
         'description' => '',
         'path' => 

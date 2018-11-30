@@ -59,6 +59,7 @@
                     <button class="layui-btn layui-btn-sm btn-setConfig" ><i class="layui-icon">&#xe614;</i> 配置</button>
                     <button class="layui-btn layui-btn-sm" id="modules_url"><i class="layui-icon">&#xe64c;</i> 指定模块生成链接</button>
                     <button class="layui-btn layui-btn-sm" id="comment"><i class="layui-icon">&#xe64e;</i> 注释协助</button>
+                    <button class="layui-btn layui-btn-sm" id="update_pwd"><i class="layui-icon">&#xe672;</i> 修改密码</button>
                     <button class="layui-btn layui-btn-sm" id="help"><span class="glyphicon ">帮助</span></button>
                     <button class="layui-btn layui-btn-sm" id="version_history"><span class="glyphicon ">版本历史</span></button>
                 </div>

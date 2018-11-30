@@ -26,6 +26,7 @@ window.page_history=page_history;
  *              4.获取配置信息
  *              5.保存配置信息
  *              6.注释生成与逆向
+ *              7.修改密码
  */
 window.post_bulid_url=page_covert+"?type=1";
 window.post_auth=page_covert+"?type=2";
@@ -33,3 +34,4 @@ window.post_del_url=page_covert+"?type=3";
 window.post_get_config=page_covert+"?type=4";
 window.post_save_config=page_covert+"?type=5";
 window.post_comment_covert=page_covert+"?type=6";
+window.post_update_pwd=page_covert+"?type=7";
