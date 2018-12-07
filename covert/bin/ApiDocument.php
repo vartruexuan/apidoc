@@ -380,6 +380,8 @@ class ApiDocument
     public function comment_covert_reverse($params,$is_reverse=false,$comment_type=1)
     {
         if($is_reverse){
+            # 清空公共参数(防止重复生成公共参数)
+            $this->config['public_params']=[];
             $this->comment_format($params);
             $result=[];
             # 格式化数据
@@ -584,6 +586,8 @@ class ApiDocument
                             //  $arr["200"]['schema']['type']='array';
                             $data['responses'] = $arr;
                         }*/
+            $data['responses']['200']["description"]="成功返回";
+
             # 解析响应数据
             if (array_key_exists('responses', $info)) {
                 $v = json_decode($info['responses'], 1);
@@ -1155,7 +1159,7 @@ class ApiDocument
         });
 
         // json encode
-        $data = json_encode($data);
+        $data = json_encode($data,JSON_UNESCAPED_UNICODE);
 
         // 将urlencode的内容进行urldecode
         $data = urldecode($data);

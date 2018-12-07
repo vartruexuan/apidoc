@@ -69,7 +69,7 @@ var DistHelper = {
         //获取接口模块json 并解析
         self = this;
         $.ajax({
-            url: this.module_url,
+            url: this.module_url+"?d="+Date.parse(new Date()),
             type: 'get',
             dataType: "json",
             beforeSend: function (xmlHttp) {
@@ -99,7 +99,7 @@ var DistHelper = {
     load_api_json: function (url) {
         var self=this;
         $.ajax({
-            url: url,
+            url: url+"?d="+Date.parse(new Date()),
             type: 'get',
             dataType: "json",
             beforeSend: function (xmlHttp) {
@@ -163,7 +163,7 @@ var DistHelper = {
             self.load_api_json(url);
             // 生成接口文档列表
             window.ui = SwaggerUIBundle({
-                url: url,
+                url: url+"?d="+Date.parse(new Date()),
                 validatorUrl: false,
                 dom_id: '#layui-body',// '#apidoc-ui',
                 deepLinking: true,

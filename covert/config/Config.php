@@ -27,16 +27,6 @@ return array (
           0 => '{{web_root_top}}',
         ),
       ),
-      1 => 
-      array (
-        'title' => 'module3',
-        'version' => 'v1.0',
-        'description' => '',
-        'path' => 
-        array (
-          0 => '{{web_root_top}}',
-        ),
-      ),
     ),
   ),
 );
