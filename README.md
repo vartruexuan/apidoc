@@ -8,7 +8,7 @@
 > ## 安装 ##
 * **github克隆到项目根目录下**
 ```git
-git clone https://github.com/XiaoGuoZhaoXuan/apidoc.git
+git clone https://github.com/php-xuan/apidoc.git
 ```
 * **或者composer安装**
 ```composer
