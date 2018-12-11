@@ -17,16 +17,6 @@ return array (
     'delimiter' => 'SUNLANDS',
     'module' => 
     array (
-      0 => 
-      array (
-        'title' => 'module49',
-        'version' => 'v1.0',
-        'description' => '',
-        'path' => 
-        array (
-          0 => '{{web_root_top}}',
-        ),
-      ),
     ),
   ),
 );
