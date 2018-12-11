@@ -36,10 +36,40 @@ var ApiHelper = {
      */
     bind_event: function () {
         var self = this;
-        // 配置事件
+        //*** 功能列表 ***//
+        //来个动画效果
+        $("div.gongneng").find("button").on("mouseover",function () {
+            $(this).find("i.layui-icon").addClass("layui-anim layui-anim-rotate layui-anim-loop");
+        });
+        $("div.gongneng").find("button").on("mouseout",function () {
+            $(this).find("i.layui-icon").removeClass("layui-anim layui-anim-rotate layui-anim-loop");
+        });
+        //刷新 (生成文档)
+        $('#doc_refresh').on('click', function () {
+            self.covert();
+        });
+
+        // 配置(设置)
         $('.btn-setConfig').on('click', function () {
             self.set_config();
         });
+
+        //生成指定模块
+        $('#modules_url').on('click', function () {
+            self.build_url();
+        });
+        //测试注释页面
+        $('#comment').on('click',function () {
+
+            self.showCommentPage();
+        })
+        //帮助页
+        $('#help').on('click',function () {
+
+            self.showHelpPage();
+        })
+        //*** 模块列表 ***//
+
         // 模块列表添加点击事件和样式
         $('.tab-container').delegate('>div>a', 'click', function () {
             $('.tab-container>div>a').css('backgroundColor', '')
@@ -47,14 +77,15 @@ var ApiHelper = {
             $('.tab-container .tab-content').addClass('hide');
             $(this).parent().find('.tab-content').removeClass('hide');
         });
-        //绑定生成指定模块
-        $('#modules_url').on('click', function () {
-            self.build_url();
+        //版本历史
+        $("#version_history").on("click",function () {
+            self.showHistoryPage();
         });
-        //刷新
-        $('#doc_refresh').on('click', function () {
-            self.covert();
+        //修改密码
+        $("#update_pwd").on('click',function () {
+            self.showUpdatePwdPage();
         });
+
         return this;
     },
     /**
@@ -128,7 +159,7 @@ var ApiHelper = {
             //添加tabs 标题
             var html_title = "";
             var html_content = "";
-            html_title += '<li  class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span style="color: ' + (modules[i]['status'] == 0 ? "green" : "red") + ';"><i class="layui-icon">' + (modules[i]['status'] == 0 ? '&#xe605;' : '&#x1006;') + '</i> ' + i + '</span></a></li>';
+            html_title += '<li  class=""><a href="#' + id + '" role="tab" data-toggle="tab"><span style="color: ' + (modules[i]['status'] == 0 ? "green" : "red") + ';"><i class="layui-icon">' + (modules[i]['status'] == 0 ? '&#xe605;' : '&#x1006;') + '</i> ' + i + '</span><span class="layui-badge layui-bg-green">'+modules[i]['api_count']+'</span></a></li>';
             html_content += '<div  class="layui-tab-item " id="' + id + '">' + dd_con + '</div>';
 
             $('.covert_module .layui-tab-title').append(html_title);
@@ -191,29 +222,198 @@ var ApiHelper = {
             type: 2,
             title: '指定模块生成链接',
             shadeClose: true,
+            anim: 3,
             shade: [0.5],
-            offset: 't',
+            //offset: 'c',
             // maxmin: true, //开启最大化最小化按钮
-            area: ['900px', '500px'],
+            area: ['70%', '90%'],
             content: page_bulid_url,
         });
     },
     /**
-     * 配置
+     * 注释解析测试
+     */
+    showCommentPage: function () {
+        layer.open({
+            type: 2,
+            title: '注释协助',
+            shadeClose: true,
+            shade: [0.5],
+            id: 'layer-comment-page',
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["98%", "90%"],
+            content: page_comment,
+        });
+        //去掉最小化按钮
+        $('.layui-layer-min').remove();
+    },
+    /**
+     * 帮助页面
+     */
+    showHelpPage: function () {
+
+        layer.msg("待定功能");
+        return;
+        layer.open({
+            type: 2,
+            title: '帮助',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 4,
+            id: 'layer-set-config',
+            //   offset: 't',
+            maxmin: true, //开启最大化最小化按钮
+            area: ["60%", "90%"],
+            content: page_comment,
+
+        });
+    },
+    /**
+     * 版本历史
+     */
+    showHistoryPage: function () {
+
+        layer.open({
+            type: 2,
+            title: '历史版本',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 4,
+            id: 'lay-version_history',
+            //   offset: 't',
+            btn:["好哒"],
+            maxmin: false, //开启最大化最小化按钮
+            area: ["60%", "90%"],
+            content: page_history,
+
+        });
+    },
+    /**
+     * 修改密码
+     */
+    showUpdatePwdPage: function () {
+        var self=this;
+        var template="";
+        template+="<div style='padding: 20px;'>";
+        template+="     <label>密码(第一次为:123)：<input type='password' name='input-password' placeholder='请输入密码' class='layui-input' title='密码' style='margin-bottom: 10px;'/></label>";
+        template+="     <label >新密码：<input type='password' name='input-new-password' placeholder='请输入新密码' class='layui-input' title='新密码' style='margin-bottom: 10px;'/></label>";
+        template+="     <label >二次密码：<input type='password' name='input-two-password' placeholder='请输入二次密码' class='layui-input' title='二次密码'/></label>";
+        template+="</div>";
+        layer.open({
+            type: 1,
+            title: '修改密码',
+            shadeClose: true,
+            shade: [0.5],
+            anim: 3,
+            id: 'lay-update-pwd',
+            //   offset: 't',
+            btn:["确认修改","取消"],
+            maxmin: false, //开启最大化最小化按钮
+            area: ["400px", "360px"],
+            yes:function (index) {
+               // 获取数据
+                var pwd=$("input[name=input-password]").val().trim();
+                var new_pwd=$("input[name=input-new-password]").val().trim();
+                var two_pwd=$("input[name=input-two-password]").val().trim();
+                if(!pwd){
+                    layer.msg("请输入密码",{icon:2});
+                    return;
+                }
+                if(!new_pwd || !two_pwd ) {
+                    layer.msg("请输入新密码", {icon: 2});
+                    return;
+                }
+                if(new_pwd !=two_pwd ) {
+                    layer.msg("两次新密码不一致", {icon: 2});
+                    return;
+                }
+                if(pwd==new_pwd){
+                    layer.msg("新密码未修改", {icon: 2});
+                    return;
+                }
+                    // 请求接口
+               self.ajax({
+                   url:post_update_pwd,
+                   type:"post",
+                   dataType:"json",
+                   data:{
+                     "pwd":pwd,
+                     "new_pwd":new_pwd
+                   },
+                   success:function (jsonData) {
+                       if(jsonData.status==0){
+                           layer.msg("修改成功",{icon:1});
+                           setTimeout(function () {
+                               top.window.location.reload();
+                           },1000);
+                       }else{
+                           layer.msg(jsonData.message,{icon:2});
+                       }
+
+                   }
+               });
+
+            },
+
+            content: template,
+        });
+    },
+
+    /**
+     * 评论测试页面
      */
     set_config: function () {
         layer.open({
             type: 2,
             title: '配置',
-            shadeClose: true,
-            shade: [0.5],
+           // shadeClose: true,
+            shade: ['0.5'],
+            anim: 1,
             id: 'layer-set-config',
+            btn:["确定","取消"],
+            yes:function (index,layro) {
+                // 获取配置窗体
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+                //保存配置
+                child_window.setConfig.save();
+            },
+            // 关闭窗口的时候提示 保存
+            cancel:function (index,layro) {
+
+                // 获取配置窗体
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+
+                child_window.layer.confirm("你还未保存,确定关闭?", {icon: 3, title:'提示'}, function (index2) {
+                    child_window.layer.close(index2);
+                    layer.close(index);
+                }, function (index2) {
+
+                    child_window.layer.close(index2);
+                });
+
+                return false;
+            },
+            // 取消关闭 窗口的时候提示 保存
+            btn2:function (index,layro) {
+                var child_window=  window.frames[layro.find('iframe:eq(0)').attr('name')];
+                child_window.layer.confirm("你还未保存,确定关闭?", {icon: 3, title:'提示'}, function (index2) {
+                    child_window.layer.close(index2);
+                    layer.close(index);
+                }, function (index2) {
+                    child_window.layer.close(index2);
+                });
+
+                return false;
+            },
             //   offset: 't',
             maxmin: true, //开启最大化最小化按钮
-            area: ["1000px", "600px"],
+            area: ["70%", "90%"],
             content: page_set_config,
 
         });
+        //去掉最小化按钮
+        $('.layui-layer-min').remove();
     },
     /**
      *  指定元素闪烁

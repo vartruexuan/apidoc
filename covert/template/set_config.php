@@ -32,20 +32,26 @@
         <div class="layui-tab-content">
             <!-- 主配置-->
             <div class="layui-tab-item layui-show">
-                <fieldset class="layui-elem-field ">
+                <fieldset class="layui-elem-field server_info">
                     <legend>主配置</legend>
                     <div class="layui-field-box">
                         <form class="layui-form">
                             <div class="layui-form-item">
                                 <label class="layui-form-label">主机域名:</label>
                                 <div class="layui-input-block">
-                                    <!-- <select name="host" lay-verify="">
-                                         <option value="1">部署环境域名</option>
-                                         <option value="">自定义</option>
-                                     </select>-->
-                                    <input type="text" name="host" placeholder="自定义域名:例如:www.baidu.com"
-                                           autocomplete="off"
-                                           class="layui-input">
+                                    <div class="layui-input-inline">
+                                        <select name="host_type" lay-verify="host_type">
+                                            <option value="1" selected >部署环境域名</option>
+                                            <option value="2">自定义</option>
+                                        </select>
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="custom_host" placeholder="自定义域名:例如:www.baidu.com"
+                                               autocomplete="off"
+                                               class="layui-input">
+                                        <input type="hidden" name="host" value="">
+                                    </div>
+
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -82,12 +88,12 @@
                                  style="width:900px;">
                                 <ul class="layui-tab-title" style="padding-right: 30px;height: auto!important;white-space: normal!important;">
                                     <!-- 模块标题-->
-                                    <li>模块样例</li>
+                                   <!--<li>模块样例</li>-->
                                 </ul>
                                 <div class="layui-tab-content"
                                      style="background: #f9feff;overflow-y: auto;height: 60%;">
                                     <!-- 模块配置 -->
-                                    <div class="layui-tab-item">
+                             <!--       <div class="layui-tab-item">
                                         <blockquote class="">
                                             <div class="layui-row layui-col-space10">
                                                 <div class="layui-col-md3">
@@ -119,16 +125,23 @@
                                                 </div>
                                             </div>
                                             <div class="layui-form-item" style="position: relative;">
-                                                <!--     <label class="layui-form-label">[文件/目录]路径:</label>-->
                                                 <fieldset class="layui-elem-field">
                                                     <legend>路径<i class="layui-icon btn-add-path"
                                                                  style="color:#0f7faa;cursor: pointer;font-size: 24px;"
                                                                  title="添加路径">&#xe61f;</i></legend>
                                                     <div class="layui-field-box module-path">
-                                                        <!-- 路径列表 -->
-                                                        <!-- 01 -->
+
                                                         <div class="layui-row">
-                                                            <div class="layui-col-md10">
+
+                                                            <div class="layui-col-md2">
+                                                                <select name="relative"  >
+                                                                    <option value="{{web_root_top}}">根目录上一级</option>
+                                                                    <option value="{{web_root_top2}}">根目录上二级</option>
+                                                                    <option value="{{web_root}}">根目录</option>
+                                                                    <option value="">绝对地址</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="layui-col-md8">
                                                                 <input type="text" name="" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="d://www/wuliao/controllers">
                                                             </div>
                                                             <div class="layui-col-md1">
@@ -138,9 +151,17 @@
                                                                 <button class="layui-btn layui-btn-fluid layui-btn-primary btn-del-path" type="button"><i class="layui-icon " style="color:red" title="删除">&#xe640;</i></button>
                                                             </div>
                                                         </div>
-                                                        <!-- 02 -->
+
                                                         <div class="layui-row">
-                                                            <div class="layui-col-md10">
+                                                            <div class="layui-col-md2">
+                                                                <select name="relative" >
+                                                                    <option value="{{web_root_top}}">根目录上一级</option>
+                                                                    <option value="{{web_root_top2}}">根目录上二级</option>
+                                                                    <option value="{{web_root}}">根目录</option>
+                                                                    <option value="">绝对地址</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="layui-col-md8">
                                                                 <input type="text" name="" placeholder="目录/文件路径" autocomplete="off" class="layui-input" value="d://www/wuliao/controllers/CommentController.php">
                                                             </div>
                                                             <div class="layui-col-md1">
@@ -159,7 +180,6 @@
                                                                  style="color:#0f7faa;cursor: pointer;font-size: 24px;"
                                                                  title="添加标签说明">&#xe61f;</i></legend>
                                                     <div class="layui-field-box module-label">
-                                                        <!-- 标签列表  -->
                                                         <div class="layui-row ">
                                                             <div class="layui-col-md3">
                                                                 <input type="text" name="" placeholder="标签名" autocomplete="off" class="layui-input" value="评价-模板">
@@ -177,7 +197,7 @@
                                                 </fieldset>
                                             </div>
                                         </blockquote>
-                                    </div>
+                                    </div>-->
                                 </div>
                             </div>
                         </form>
@@ -187,25 +207,6 @@
         </div>
     </div>
 </div>
-<div class="layui-footer" style="position: fixed; bottom: 0;width: 100%;">
-    <div class="layui-bg-gray layui-row layui-col-space10">
-
-        <div class="layui-col-md9">
-            &nbsp;
-        </div>
-        <div class="layui-col-md1">
-            &nbsp;
-        </div>
-        <div class="layui-col-md1">
-            <button class="layui-btn layui-btn-lg btn-save"> 保存</button>
-        </div>
-        <div class="layui-col-md1">
-            <button class="layui-btn layui-btn-lg layui-btn-danger btn-cancel"> 取消</button>
-        </div>
-    </div>
-
-</div>
-
 <script src="<?php echo API_COVERT_JS ?>/plug/jquery.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/plug/layui-v2.3.0/layui/layui.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/set_config.js"></script>
