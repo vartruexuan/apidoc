@@ -17,6 +17,16 @@ return array (
     'delimiter' => 'SUNLANDS',
     'module' => 
     array (
+      0 => 
+      array (
+        'title' => '测试',
+        'version' => 'v1.0',
+        'description' => '',
+        'path' => 
+        array (
+          0 => 'D:/www/test/cronus/manager/controllers/IndexController.php',
+        ),
+      ),
     ),
   ),
 );
