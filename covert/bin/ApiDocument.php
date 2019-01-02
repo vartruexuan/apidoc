@@ -273,7 +273,7 @@ class ApiDocument
      * @param  $to_dir   生成json文件存放目录（false 则不保存到文件中）
      * @param  $is_depath 递归层级  (0 不递归 ,<0 无限制递归  >0 递归层级 )
      */
-    private function dir_format_json($from_dir, $is_depath = -1, $module = null)
+    private function dir_format_json($from_dir, $is_depath = -1, &$module = null)
     {
         try {
             if (!is_dir($from_dir)) {
@@ -700,7 +700,7 @@ class ApiDocument
                             $this->dir_format_json($p, -1, $m);
                             # 如果是文件
                         } else {
-                            $this->file_format_json($p);
+                            $this->file_format_json($p,$comment,$m);
                         }
 
                     }
