@@ -41,7 +41,7 @@ class ApiDocument
         # 默认密码
         'covert_password' => '123',
         # 默认分隔符
-        'delimiter' => 'SUNLANDS',
+        'delimiter' => 'APIDOC',
         #公共参数--所有接口
         "public_params" => array(),
         #公共提示消息--当showMessage时显示的消息
