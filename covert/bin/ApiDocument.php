@@ -38,6 +38,10 @@ class ApiDocument
      * @var array
      */
     private $config = array(
+        # 默认密码
+        'covert_password' => '123',
+        # 默认分隔符
+        'delimiter' => 'SUNLANDS',
         #公共参数--所有接口
         "public_params" => array(),
         #公共提示消息--当showMessage时显示的消息
@@ -77,7 +81,7 @@ class ApiDocument
             'license' => array('name' => 'MIT'),
         ),
         //主机地址
-        'host' => 'http://localhost',
+        'host' => '{{local_host}}',
         //父地址，可以是模块名 : /api
         'basePath' => '',
         //API的传输协议。值必须来自列表：“HTTP”、“HTTPS”、“WS”、“WSS”。如果不包括方案，则要使用的默认方案是用于访问规范的方案。
@@ -123,7 +127,8 @@ class ApiDocument
 
         ### 加载config.php 并配置初始化json,config ###
         # 加载配置文件
-        $params = require(__DIR__ . '/../config/Config.php');
+        //$params = require(__DIR__ . '/../config/Config.php');
+        $params=$this->getAllConfig();
 
         $this->json = array_merge($this->json, $params['server_info']);//合并json配置
         $this->config = array_merge($this->config, $params['config']);//合并公共配置
@@ -1026,11 +1031,27 @@ class ApiDocument
 ###################### 配置操作  #############################
 
     /**
+     * 初始化配置文件
+     */
+    public function initConfig()
+    {
+        $path=__DIR__ . '/../config/Config.php';
+        if(!is_file($path)){
+            $config=[
+                "server_info" =>    $this->json,
+                "config" =>    $this->config,
+            ];
+            $this->writeConfig($config);
+        }
+    }
+    /**
      * 获取所有配置数据
      * @return mixed
      */
     public function getAllConfig()
     {
+        # 为发现配置文件 初始化配置文件
+        $this->initConfig();
         return require(__DIR__ . '/../config/Config.php');
     }
 
