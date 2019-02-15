@@ -171,7 +171,7 @@ class ApiDocument
     }
 
     /**
-     * 获取当前Swagger_Helper实例对象
+     * 获取当前ApiDocument实例对象
      * @return null|ApiDocument
      */
     public static function getObj($config = array())
@@ -423,6 +423,12 @@ class ApiDocument
             if(isset($params['description'])&&$params['description']){
                 $comment.="* @description ".$params['description']."\n";
             }
+            # mime
+            if(isset($params['consumes'])&&$params['consumes']){
+
+                $comment.="* @consumes ". $params['consumes']."\n";
+
+            }
 
             # 标签
             if(isset($params['tags'])&&$params['tags']){
@@ -546,7 +552,9 @@ class ApiDocument
                             return !(trim($v) === "");
                         });
                         $p = array_splice($p, 0, count($p));
-                        $arr['type'] = $p[0];//类型
+                        if($p[0]!='/'){
+                            $arr['type'] = $p[0];//类型
+                        }
                         $arr['name'] = $p[1];//名字
                         $arr['default'] = $p[2] == '/' ? '' : $p[2];//默认值
                         $arr['in'] = $p[3];//位置
@@ -581,7 +589,8 @@ class ApiDocument
                 $data['consumes'] = ['application/x-www-form-urlencoded'];
             }
             if (array_key_exists('consumes', $info)) {
-                $data['consumes'] = [$info['consumes']];
+                $consumes=array_filter(explode(" ",$info['consumes']));
+                $data['consumes'] = $consumes;
             }
             #解析响应数据
             /*            if (array_key_exists('return', $info)) {

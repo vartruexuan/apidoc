@@ -76,6 +76,16 @@
                                            placeholder="多个空格分隔" autocomplete="off" class="layui-input">
                                 </div>
                             </div>
+                            <div class="layui-form-item ">
+                                <label class="layui-form-label">mime<i class="layui-icon btn-add-mime"
+                                                                           style="color:#0f7faa;cursor: pointer;font-size: 18px;"
+                                                                           title="添加mime">&#xe61f;</i></label>
+                                <div class="layui-input-block div-consumes">
+                                    <input type="checkbox" name="consumes" title="application/json">
+                                    <input type="checkbox" name="consumes" title="application/x-www-form-urlencoded">
+                                    <input type="checkbox" name="consumes" title="application/xml">
+                                </div>
+                            </div>
                             <div class="layui-form-item">
                                 <fieldset class="layui-elem-field">
                                     <legend>请求参数 <i class="layui-icon btn-add-params"

@@ -39,7 +39,15 @@ var comment_help = {
         $(document).delegate(".btn-add-responses", 'click', function () {
             self.add_response();
         });
+        //添加mime
+        $(document).delegate('.btn-add-mime','click',function () {
+            layer.prompt({title:"自定义mime"},function(val, index){
+                $(".div-consumes").append('<input type="checkbox" name="consumes" title="'+val+'">');
+                form.render();
+                layer.close(index);
+            });
 
+        })
         //生成注释
         $(document).delegate(".btn-covert-comment", "click", function () {
             self.comment_covert();
@@ -246,6 +254,11 @@ var comment_help = {
             //url
             var urlObj=$('form.form-comment').find("input[name=url]");
             var url = $('form.form-comment').find("input[name=url]").val();
+            //mime
+            var consumes = [];//支持协议
+            $('.div-consumes').find('input[name=consumes]:checked').each(function () {
+                consumes.push($(this).attr("title"));
+            });
             //描述
             var descriptionObj =$('form.form-comment').find("input[name=description]");
             var description = descriptionObj.val();
@@ -337,6 +350,7 @@ var comment_help = {
                 "method":method,
                 "url":url,
                 "method":method,
+                "consumes":consumes.join(" "),
                 "description":description,
                 "tags":tags,
                 "parameters":parameters,

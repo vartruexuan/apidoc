@@ -55,12 +55,12 @@ return array (
     array (
       0 => 
       array (
-        'title' => 'module89',
+        'title' => '测试',
         'version' => 'v1.0',
         'description' => '',
         'path' => 
         array (
-          0 => '{{web_root_top}}',
+          0 => '{{web_root_top}}/module/wifi/modules/v1/modules/frontend/controllers/IndexController.php',
         ),
       ),
     ),
