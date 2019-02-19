@@ -128,7 +128,7 @@ class ApiDocument
         ### 加载config.php 并配置初始化json,config ###
         # 加载配置文件
         //$params = require(__DIR__ . '/../config/Config.php');
-        $params=$this->getAllConfig();
+        $params = $this->getAllConfig();
 
         $this->json = array_merge($this->json, $params['server_info']);//合并json配置
         $this->config = array_merge($this->config, $params['config']);//合并公共配置
@@ -264,7 +264,7 @@ class ApiDocument
         #host占位符替换
         # 占位符替换
         foreach ($this->placeholder["host"] as $k => $v) {
-            $this->json_cache['host'] = str_replace($k, $v,$this->json_cache['host']);
+            $this->json_cache['host'] = str_replace($k, $v, $this->json_cache['host']);
         }
         # 设置模块标签
         if (array_key_exists('tags', $module) && $module['tags'] && is_array($module['tags'])) {
@@ -382,103 +382,103 @@ class ApiDocument
      * @return array|mixed|string
      * @throws ApiDocumentException
      */
-    public function comment_covert_reverse($params,$is_reverse=false,$comment_type=1)
+    public function comment_covert_reverse($params, $is_reverse = false, $comment_type = 1)
     {
-        if($is_reverse){
+        if ($is_reverse) {
             # 清空公共参数(防止重复生成公共参数)
-            $this->config['public_params']=[];
+            $this->config['public_params'] = [];
             $this->comment_format($params);
-            $result=[];
+            $result = [];
             # 格式化数据
-            foreach ($this->json_cache["paths"] as $url=>$api){
+            foreach ($this->json_cache["paths"] as $url => $api) {
 
-                foreach ($api as $method =>$a){
-                    $result[]=array(
-                        "url"=>$url,
-                        "method"=>$method,
-                        "title"=>$a["summary"],
-                        "description"=>$a["description"],
-                        "tags"=>$a["tags"],
-                        "parameters"=>isset($a["parameters"])?$a["parameters"]:[],
-                        "responses"=>isset($a["responses"])?$a["responses"]:[],
+                foreach ($api as $method => $a) {
+                    $result[] = array(
+                        "url" => $url,
+                        "method" => $method,
+                        "title" => $a["summary"],
+                        "description" => $a["description"],
+                        "tags" => $a["tags"],
+                        "parameters" => isset($a["parameters"]) ? $a["parameters"] : [],
+                        "responses" => isset($a["responses"]) ? $a["responses"] : [],
                     );
                 }
             }
-          return  $result;
-        }else{
+            return $result;
+        } else {
 
             # 定界符
-            $comment="/**".$this->delimiter."\n";
+            $comment = "/**" . $this->delimiter . "\n";
             # url
-            if(!isset($params['url']) || !$params['url']){
+            if (!isset($params['url']) || !$params['url']) {
                 throw new \ApiDocumentException("url为必填项");
             }
-            $comment.="* @url ".$params['url']."\n";
+            $comment .= "* @url " . $params['url'] . "\n";
             # 请求方式
-            $comment.="* @method ".$params['method']."\n";
+            $comment .= "* @method " . $params['method'] . "\n";
 
             # 接口名称
-            $comment.="* @summary ".$params['title']."\n";
+            $comment .= "* @summary " . $params['title'] . "\n";
             # 接口描述
-            if(isset($params['description'])&&$params['description']){
-                $comment.="* @description ".$params['description']."\n";
+            if (isset($params['description']) && $params['description']) {
+                $comment .= "* @description " . $params['description'] . "\n";
             }
             # mime
-            if(isset($params['consumes'])&&$params['consumes']){
+            if (isset($params['consumes']) && $params['consumes']) {
 
-                $comment.="* @consumes ". $params['consumes']."\n";
+                $comment .= "* @consumes " . $params['consumes'] . "\n";
 
             }
 
             # 标签
-            if(isset($params['tags'])&&$params['tags']){
-                $tags=implode(" ",array_filter(explode(" ",$params['tags'])));
-                $comment.="* @tags ".$tags."\n";
+            if (isset($params['tags']) && $params['tags']) {
+                $tags = implode(" ", array_filter(explode(" ", $params['tags'])));
+                $comment .= "* @tags " . $tags . "\n";
             }
             # 参数
-            if(isset($params["parameters"])&&$params["parameters"]){
+            if (isset($params["parameters"]) && $params["parameters"]) {
 
-                foreach ($params["parameters"] as $p){
-                    $p["default"]=isset($p["default"])&&$p["default"]?$p["default"]:"/";
-                    $p["description"]=isset($p["description"])&&$p["description"]?$p["description"]:"/";
-                    $p["required"]=isset($p["required"])&&$p["required"]?$p["required"]:"false";
-                    $p["allowEmptyValue"]=isset($p["allowEmptyValue"])&&$p["allowEmptyValue"]?$p["allowEmptyValue"]:"true";
-                    if($comment_type==1){
-                        $comment.="* @param {$p["type"]} {$p["name"]} {$p["default"]} {$p["in"]} {$p["description"]} {$p["required"]} {$p["allowEmptyValue"]}\n";
-                    }elseif ($comment_type==2){
-                        $comment.="* @param ".json_encode($p,JSON_UNESCAPED_UNICODE)."\n";
+                foreach ($params["parameters"] as $p) {
+                    $p["default"] = isset($p["default"]) && $p["default"] ? $p["default"] : "/";
+                    $p["description"] = isset($p["description"]) && $p["description"] ? $p["description"] : "/";
+                    $p["required"] = isset($p["required"]) && $p["required"] ? $p["required"] : "false";
+                    $p["allowEmptyValue"] = isset($p["allowEmptyValue"]) && $p["allowEmptyValue"] ? $p["allowEmptyValue"] : "true";
+                    if ($comment_type == 1) {
+                        $comment .= "* @param {$p["type"]} {$p["name"]} {$p["default"]} {$p["in"]} {$p["description"]} {$p["required"]} {$p["allowEmptyValue"]}\n";
+                    } elseif ($comment_type == 2) {
+                        $comment .= "* @param " . json_encode($p, JSON_UNESCAPED_UNICODE) . "\n";
                     }
                 }
             }
             # 响应数据
-            if(isset($params["responses"])&&$params["responses"]){
-                $responses=[];
-                foreach ($params["responses"] as $r){
+            if (isset($params["responses"]) && $params["responses"]) {
+                $responses = [];
+                foreach ($params["responses"] as $r) {
 
-                    $result=json_decode($r["examples"],true);
-                    if(!$result){
+                    $result = json_decode($r["examples"], true);
+                    if (!$result) {
                         throw new \ApiDocumentException("响应数据不是正确的json格式数据");
                     }
                     # 替换一些特殊符号 "
-                    $result=$this->json_value_replace($result);
-                    $responses[$r["status"]]["examples"][$r["produces"]]=$result;
-                    if(isset($r["description"])){
-                        $responses[$r["status"]]["description"]=$r["description"];
+                    $result = $this->json_value_replace($result);
+                    $responses[$r["status"]]["examples"][$r["produces"]] = $result;
+                    if (isset($r["description"])) {
+                        $responses[$r["status"]]["description"] = $r["description"];
                     }
                 }
 
                 # json 格式化加上*
-                $responses=$this->jsonFormat($responses);
-                $responses=" @responses".$responses."responses";
-                $responses=implode("\n",array_map(function($n){
-                    return "*".$n;
-                },explode("\n",$responses)));
+                $responses = $this->jsonFormat($responses);
+                $responses = " @responses" . $responses . "responses";
+                $responses = implode("\n", array_map(function ($n) {
+                    return "*" . $n;
+                }, explode("\n", $responses)));
 
-                $comment.=$responses."\n";
+                $comment .= $responses . "\n";
 
             }
-            $comment.="* @return array\n";
-            $comment.="*/";
+            $comment .= "* @return array\n";
+            $comment .= "*/";
             return $comment;
         }
     }
@@ -552,13 +552,13 @@ class ApiDocument
                             return !(trim($v) === "");
                         });
                         $p = array_splice($p, 0, count($p));
-                        if($p[0]!='/'){
+                        if ($p[0] != '/') {
                             $arr['type'] = $p[0];//类型
                         }
                         $arr['name'] = $p[1];//名字
-                        $arr['default'] = $p[2] == '/' ? '' : $p[2];//默认值
+                        $arr['default'] = $p[2] != '/' ? $p[2] : "";//默认值
                         $arr['in'] = $p[3];//位置
-                        $arr['description'] = isset($p[4]) &&$p[4]!='/' ? $p[4] : '';//描述*/
+                        $arr['description'] = isset($p[4]) && $p[4] != '/' ? $p[4] : '';//描述*/
                         $arr['required'] = (isset($p[5]) && $p[5] == 'true');//是否必填
                         $arr['allowEmptyValue'] = (isset($p[6]) && $p[6] == 'true');//是否允许为空(空值则也会发送)
                         $data['parameters'][] = $arr;
@@ -589,7 +589,7 @@ class ApiDocument
                 $data['consumes'] = ['application/x-www-form-urlencoded'];
             }
             if (array_key_exists('consumes', $info)) {
-                $consumes=array_filter(explode(" ",$info['consumes']));
+                $consumes = array_filter(explode(" ", $info['consumes']));
                 $data['consumes'] = $consumes;
             }
             #解析响应数据
@@ -600,7 +600,7 @@ class ApiDocument
                             //  $arr["200"]['schema']['type']='array';
                             $data['responses'] = $arr;
                         }*/
-            $data['responses']['200']["description"]="成功返回";
+            $data['responses']['200']["description"] = "成功返回";
 
             # 解析响应数据
             if (array_key_exists('responses', $info)) {
@@ -714,7 +714,7 @@ class ApiDocument
                             $this->dir_format_json($p, -1, $m);
                             # 如果是文件
                         } else {
-                            $this->file_format_json($p,$comment,$m);
+                            $this->file_format_json($p, $comment, $m);
                         }
 
                     }
@@ -728,6 +728,11 @@ class ApiDocument
                     $this->moduleMessage[$m['title']]['status'] = ErrorCode::MODULE_ERROR;
                     $this->moduleMessage[$m['title']]['status_message'] = $ae->getMessage();
                     $this->moduleMessage[$m['title']]['message'] = $ae->getMessage();
+                    if(isset($comment)){
+                        $this->moduleMessage[$m['title']]['file_name'] = $p;
+                        $this->moduleMessage[$m['title']]['com'] = $comment;
+                    }
+
                 }
             }
         } catch (\Exception $e) {
@@ -905,11 +910,13 @@ class ApiDocument
     {
         $this->showPage('help', null, [], $is_auth, $is_window);
     }
+
     # 显示历史版本
     public function showHistoryPage($is_auth = true, $is_window = true)
     {
         $this->showPage('history', null, [], $is_auth, $is_window);
     }
+
     # 显示设置页面
     public function showSetConfig($is_auth = true, $is_window = true)
     {
@@ -1044,15 +1051,16 @@ class ApiDocument
      */
     public function initConfig()
     {
-        $path=__DIR__ . '/../config/Config.php';
-        if(!is_file($path)){
-            $config=[
-                "server_info" =>    $this->json,
-                "config" =>    $this->config,
+        $path = __DIR__ . '/../config/Config.php';
+        if (!is_file($path)) {
+            $config = [
+                "server_info" => $this->json,
+                "config" => $this->config,
             ];
             $this->writeConfig($config);
         }
     }
+
     /**
      * 获取所有配置数据
      * @return mixed
@@ -1189,7 +1197,7 @@ class ApiDocument
         });
 
         // json encode
-        $data = json_encode($data,JSON_UNESCAPED_UNICODE);
+        $data = json_encode($data, JSON_UNESCAPED_UNICODE);
 
         // 将urlencode的内容进行urldecode
         $data = urldecode($data);

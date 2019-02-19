@@ -61,6 +61,7 @@ return array (
         'path' => 
         array (
           0 => '{{web_root_top}}/module/wifi/modules/v1/modules/frontend/controllers/IndexController.php',
+          1 => '{{web_root_top}}/module/wifi/modules/v1/modules/backend/controllers/IndexController.php',
         ),
       ),
     ),

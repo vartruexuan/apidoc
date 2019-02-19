@@ -188,7 +188,7 @@ var DistHelper = {
                 //隐藏信息
                 $('#layui-body .information-container').hide();
                 var description=$('#layui-body .information-container .description').text();
-                $('#layui-body .scheme-container').attr('style', 'position:fixed;width:100%');
+                $('#layui-body .scheme-container').attr('style', 'position:fixed;width:88%');
                 $('#layui-body .scheme-container').append('<section class="schemes wrapper block col-6">'+description+'</section>');
                 if ($('.opblock-tag-section').length > 0) {
                     clearInterval(self.closeOpenTime);
