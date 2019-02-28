@@ -16,5 +16,5 @@ composer require guozhaoxuan/php-apidoc
 ```
 > ## 注释规范 ##
 > ## 页面效果 ##
-![首页](https://github.com/php-xuan/doc/blob/master/apidoc/img/%E7%94%9F%E6%88%90%E6%B3%A8%E9%87%8A.gif)
+![首页](https://github.com/php-xuan/doc/blob/master/apidoc/img/%E9%A6%96%E9%A1%B5.jpg)
    
