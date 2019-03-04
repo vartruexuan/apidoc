@@ -181,6 +181,7 @@
                                             <tr>
                                                 <th>状态</th>
                                                 <th>类型</th>
+                                                <th>描述</th>
                                                 <th>结果</th>
                                                 <th width="44">操作</th>
                                             </tr>
