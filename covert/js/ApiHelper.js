@@ -242,6 +242,9 @@ var ApiHelper = {
             id: 'layer-comment-page',
             //   offset: 't',
             maxmin: true, //开启最大化最小化按钮
+            resizing: function(layero){
+                layero.window.$("body").height();
+            },
             area: ["98%", "90%"],
             content: page_comment,
         });

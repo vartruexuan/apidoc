@@ -15,7 +15,8 @@ $apiobj = ApiDocument::getObj();
 $method=strtolower($_SERVER['REQUEST_METHOD']);
 if ( $method== 'get') {
     $page=isset($_GET['page'])?$_GET['page']:0;
-    if ($page == 0) {//主页面生成文档
+
+    if ($page == 0) {
         $apiobj->showCovertPage();
     } else if ($page == 1) {//生成链接
         $apiobj->showBulidPage();
@@ -94,9 +95,9 @@ if ( $method== 'get') {
         # 验证配置
         foreach ($params["config"]["module"] as &$module){
             if(isset($module['path'])){
-              foreach ($module['path'] as &$path){
-                  $path=str_replace('\\',"/",$path);
-              }
+                $module['path']= array_unique(array_filter(array_map(function ($path){
+                    return trim(str_replace('\\',"/",$path));
+                },$module['path'])));
             }
         }
         #1.拼接配置

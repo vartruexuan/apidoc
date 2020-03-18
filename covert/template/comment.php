@@ -30,7 +30,7 @@
         <div class="layui-tab-content">
             <!-- 注释生成互转 -->
             <div class="layui-tab-item layui-show">
-                <div class="layui-row">
+                <div class="layui-row  div-buju">
                     <div class="layui-col-xs7 layui-col-sm7 layui-col-md7 layui-layer-border"
                          style="padding: 10px;height: 520px;overflow-y: auto">
                         <!-- 注释属性填写 -->
@@ -74,6 +74,16 @@
                                 <div class="layui-input-block">
                                     <input type="text" name="tags" required lay-verify="required"
                                            placeholder="多个空格分隔" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item ">
+                                <label class="layui-form-label">mime<i class="layui-icon btn-add-mime"
+                                                                           style="color:#0f7faa;cursor: pointer;font-size: 18px;"
+                                                                           title="添加mime">&#xe61f;</i></label>
+                                <div class="layui-input-block div-consumes">
+                                    <input type="checkbox" name="consumes" title="application/json">
+                                    <input type="checkbox" name="consumes" title="application/x-www-form-urlencoded">
+                                    <input type="checkbox" name="consumes" title="application/xml">
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -171,6 +181,7 @@
                                             <tr>
                                                 <th>状态</th>
                                                 <th>类型</th>
+                                                <th>描述</th>
                                                 <th>结果</th>
                                                 <th width="44">操作</th>
                                             </tr>
@@ -259,6 +270,7 @@
     </div>
 
 </div>
+
 </body>
 
 <!--  模板列表  -->
@@ -273,4 +285,15 @@
 <script src="<?php echo API_COVERT_JS ?>/plug/json/jquery.json-editor.min.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/plug/json.format.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/comment.js"></script>
+
+
+<script>
+
+    $(function () {
+        console.log($(window).height());
+        $('.div-buju').height($(window).height());
+
+    })
+
+</script>
 </html>
