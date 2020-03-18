@@ -186,7 +186,10 @@ var config = {
             template += '   </div>';
             template += '    <div class="layui-form-item" style="position: relative;">';
             template += '         <fieldset class="layui-elem-field">';
-            template += '             <legend>路径 <i class="layui-icon btn-add-path" style="color:#0f7faa;cursor: pointer;font-size: 24px;"title="添加路径">&#xe61f;</i></legend>';
+            template += '             <legend>' +
+                '                           路径 <i class="layui-icon btn-add-path" style="color:#0f7faa;cursor: pointer;font-size: 24px;"title="添加路径">&#xe61f;</i>' +
+                '                           自定义注释 <i class="layui-icon btn-add-comment-path" style="color:#0f7faa;cursor: pointer;font-size: 24px;"title="自定义注释">&#xe61f;</i>' +
+                '                       </legend>';
             template += '             <div class="layui-field-box module-path">#path#</div>';
             template += '         </fieldset>';
             template += '     </div>';

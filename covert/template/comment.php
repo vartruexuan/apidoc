@@ -30,7 +30,7 @@
         <div class="layui-tab-content">
             <!-- 注释生成互转 -->
             <div class="layui-tab-item layui-show">
-                <div class="layui-row">
+                <div class="layui-row  div-buju">
                     <div class="layui-col-xs7 layui-col-sm7 layui-col-md7 layui-layer-border"
                          style="padding: 10px;height: 520px;overflow-y: auto">
                         <!-- 注释属性填写 -->
@@ -270,6 +270,7 @@
     </div>
 
 </div>
+
 </body>
 
 <!--  模板列表  -->
@@ -284,4 +285,15 @@
 <script src="<?php echo API_COVERT_JS ?>/plug/json/jquery.json-editor.min.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/plug/json.format.js"></script>
 <script src="<?php echo API_COVERT_JS ?>/comment.js"></script>
+
+
+<script>
+
+    $(function () {
+        console.log($(window).height());
+        $('.div-buju').height($(window).height());
+
+    })
+
+</script>
 </html>

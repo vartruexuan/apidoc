@@ -572,9 +572,11 @@ class ApiDocument
             }
             #解析标签
             if (array_key_exists('tags', $info)) {
-                $data['tags'] = array_filter(explode(' ', $info['tags']), function ($v) {
-                    return !(trim($v) === "");
-                });
+                $data['tags'] = array_values(array_filter(explode(' ', $info['tags']),function($a){
+
+                    return !(trim($a)==="");
+                }));
+               // var_dump($data['tags']);die;
             }
             #解析标识 operationId
             if (array_key_exists('operationId', $info)) {
@@ -1152,6 +1154,8 @@ class ApiDocument
         $content = "<?php\n";
         $content .= 'return ';
         $content .= var_export($config, true);
+        # 替换数字索引(合并冲突问题)
+        $content=preg_replace ("/\d+ =>/","",$content);
         $content .= ";\n";
         # 创建并打开配置文件
         touch($config_path);

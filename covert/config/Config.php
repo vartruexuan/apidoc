@@ -21,15 +21,15 @@ return array (
     'basePath' => '',
     'schemes' => 
     array (
-      0 => 'HTTP',
+       'HTTP',
     ),
     'consumes' => 
     array (
-      0 => 'application/json',
+       'application/json',
     ),
     'produces' => 
     array (
-      0 => 'application/json',
+       'application/json',
     ),
     'tags' => 
     array (
@@ -53,15 +53,32 @@ return array (
     ),
     'module' => 
     array (
-      0 => 
+       
       array (
         'title' => '测试',
         'version' => 'v1.0',
         'description' => '',
         'path' => 
         array (
-          0 => '{{web_root_top}}/module/wifi/modules/v1/modules/frontend/controllers/IndexController.php',
-          1 => '{{web_root_top}}/module/wifi/modules/v1/modules/backend/controllers/IndexController.php',
+           '{{web_root_top}}/apidoc/test.php',
+        ),
+        'tags' => 
+        array (
+           
+          array (
+            'name' => 'sss',
+            'description' => '',
+          ),
+        ),
+      ),
+       
+      array (
+        'title' => 'module78',
+        'version' => 'v1.0',
+        'description' => '',
+        'path' => 
+        array (
+           '{{web_root_top}}/apidoc/test.php',
         ),
       ),
     ),
