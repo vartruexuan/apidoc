@@ -10,11 +10,4 @@
 ```git
 git clone https://github.com/php-xuan/apidoc.git
 ```
-* **或者composer安装**
-```composer
-composer require guozhaoxuan/php-apidoc
-```
-> ## 注释规范 ##
-> ## 页面效果 ##
-![首页](https://github.com/php-xuan/doc/blob/master/apidoc/img/%E9%A6%96%E9%A1%B5.jpg)
    
