@@ -1,10 +1,11 @@
 {
-    "name": "guozhaoxuan/php-apidoc",
+    "name": "php-xuan/php-apidoc",
     "description": "php接口文档生成调试工具",
+    "type":"library",
     "version": "1.0.0",
     "license": "MIT",
     "keywords": ["php", "api", "apidoc"],
-    "homepage": "https://github.com/XiaoGuoZhaoXuan/apidoc",
+    "homepage": "https://github.com/php-xuan/apidoc",
     "authors": [
         {
             "name": "guozhaoxuan",
@@ -12,7 +13,7 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/XiaoGuoZhaoXuan/apidoc"
+        "issues": "https://github.com/php-xuan/apidoc"
     },
     "require": {
         "php": ">=5.6.0"
